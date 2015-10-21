@@ -1,9 +1,21 @@
 var models = require(__base + 'models/mongoose/mongoose-models.js'),
 	Promise = require("bluebird");
 var Spotify = require(__base + "modules/spotify/Spotify");
+var _ = require("lodash");
+
+var getModuleApi = function(module, user) {
+	return new Promise(function(resolve, reject) {
+		console.log(module);
+		if (typeof module.getApi === "function") {
+			module.getApi(user).then(resolve).catch(reject);
+		} else {
+			return resolve(null);
+		}
+	});
+}
 
 var Music = function() {"use strict"};
-
+Music.sources = [];
 Music.getMyArtists = function(user, options) {
 	if (!options) {
 		options = {};
@@ -91,6 +103,25 @@ Music.convertTracksetTo = function(trackset, to, user) {
 			console.log("unknown to " + to);
 			return resolve(trackset);
 		}
+	});
+}
+
+Music.search = function(source, query, user) {
+	return new Promise(function(resolve, reject) {
+		var module = null;
+		_.forEach(Music.sources, function(s) {
+			if (s) {
+				module = s;
+			}
+		});
+		if (!module) {
+			return reject("unknown source");
+		}
+		getModuleApi(module.module, user).then(function(api) {
+			api = api || module.module;
+			api.search(query).then(resolve).catch(reject);
+		}).catch(reject);
+		
 	});
 }
 

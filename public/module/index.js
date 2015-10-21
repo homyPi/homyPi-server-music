@@ -3,6 +3,5 @@ module.exports = {
 	actions: require("./actions"),
 	api: require("./apis"),
 	components: require("./components"),
-	stores: require("./stores"),
-	config: require("./config")
+	stores: require("./stores")
 }

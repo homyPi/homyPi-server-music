@@ -9,13 +9,15 @@ function setHeaders(xhr) {
 }
 
 export default {
-	search(request, type) {
+	search(request, type, source) {
 console.log("hey =>",serverUrl);
 		return new Promise((resolve, reject) => {
-			let url = serverUrl + "/spotify/search?q=" + request;
+			let url = serverUrl + "/search?q=" + request;
 			if (type) {
 				url += "&type=" + type;
 			}
+			source = source || "spotify";
+			url += "&source=" + source;
 			$.ajax({
 					url: url,
 					type: "GET",

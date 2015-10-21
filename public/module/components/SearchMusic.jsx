@@ -1,5 +1,7 @@
 import React, {PropTypes} from 'react';
-import {TextField, RaisedButton, Tabs, Tab} from 'material-ui';
+import {TextField, FlatButton, Tabs, Tab} from 'material-ui';
+
+
 import MusicSearchStore from '../stores/MusicSearchStore';
 import MusicSearchActions from '../actions/MusicSearchActionCreators';
 import Track from "./Track";
@@ -49,18 +51,18 @@ export default React.createClass({
 						className="search-input"
 		  				value={this.state.search}
 		  				onChange={this._handleSearchChange}/>
-		  			<RaisedButton 
+		  			<FlatButton 
 						className="search-button"
-						type="submit"
 						label="Search" onClick={this._handleSearch}/>
 				</form>
 				<Tabs>
+			
 					<Tab label="Tracks"
 						onActive={this._setSeachType.bind(this, "track")}>
 			  			
 			  			{(tracks.items)?
 				  			tracks.items.map(result =>
-					          <Track key={result.id} track={result} playTrack={this._playTrack} addTrack={this._addTrackInPlaylist}/>
+					          <Track key={result._id} track={result} playTrack={this._playTrack} addTrack={this._addTrackInPlaylist}/>
 				            ): null
 				        }
 					</Tab>
@@ -85,6 +87,8 @@ export default React.createClass({
 					        }
 				        </div>
 					</Tab>
+
+			
 				</Tabs>
 			</div>
 		);
