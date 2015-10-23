@@ -7,7 +7,7 @@
     "flux": "^2.1.1",
     "jquery": "^2.1.4",
     "lodash": "^3.10.1",
-    "material-ui": "^0.12.4",
+    "material-ui": "^0.13.0",
     "material-ui-sass": "^0.7.5",
     "react": "^0.14.0",
     "react-addons-create-fragment": "^0.14.0",
