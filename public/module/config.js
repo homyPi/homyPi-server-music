@@ -10,6 +10,7 @@ import MyArtists from "./components/MyArtists";
 
 export default 
 module.exports = {
+	name: "Music",
 	routes: (
 	    <Route path="music" component={Music}>
             <Route name="searchMusic" path="search(/:search)" component={MusicSearch} />
