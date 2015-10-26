@@ -7,5 +7,7 @@ module.exports = function(router) {
 	router.post("/playlists", userMiddleware.isLoggedIn,  PlaylistMiddleware.add);
 	router.delete("/playlists/:trackId", userMiddleware.isLoggedIn,  PlaylistMiddleware.deleteTrack);
 
+	router.get("/playlists/generate", userMiddleware.isLoggedIn,  PlaylistMiddleware.generate);
+
 	return router;
 };

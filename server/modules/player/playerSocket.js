@@ -1,11 +1,11 @@
 /**
  * Created by nolitsou on 9/8/15.
  */
-var Playlist  = require(__base + "models/Playlist");
+var Playlist  = require("../playlist/Playlist");
 var Raspberry  = require(__base + "models/Raspberry");
-var Spotify  = require(__base + "modules/spotify/Spotify");
-var MusicGraph = require(__base + "modules/MusicGraph");
+//var MusicGraph = require(__base + "modules/MusicGraph");
 var _ = require("lodash");
+var MusicSource = require("../sources/MusicSource");
 
 module.exports = function(socket) {
 	socket.on("player:generatePlaylist", function(request) {
@@ -39,6 +39,8 @@ module.exports = function(socket) {
 	});
 	socket.on("player:play:album", function(data) {
 		var trackset = [];
+		var Spotify = MusicSource.getSourceModule("spotify");
+
 		Spotify.getApi(socket.decoded_token).then(function(api) {
 			api.getAlbumTracks(data.id).then(function(response) {
 				_.forEach(response.body.items, function(item) {

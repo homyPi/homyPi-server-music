@@ -1,5 +1,5 @@
-var Playlist = require(__base + "models/Playlist");
-
+var Playlist = require("./Playlist");
+var PlaylistGenerator = require("./PlaylistGenerator");
 /**
  * Get current trackset
  */
@@ -66,9 +66,21 @@ var clearPlaylist = function(req, res) {
 	})
 };
 
+var generate = function(req, res) {
+	PlaylistGenerator.generate(req.user, "spotify")
+		.then(function(playlist) {
+			res.json({playlist: playlist});
+		}).catch(function(err) {
+			console.log(err);
+			console.log(err.stack);
+			res.json({err: err});
+		})
+}
+
 module.exports = {
 	get: get,
 	deleteTrack: deleteTrack,
 	add: add,
-	clearPlaylist: clearPlaylist
+	clearPlaylist: clearPlaylist,
+	generate: generate
 }

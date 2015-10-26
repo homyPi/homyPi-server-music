@@ -1,7 +1,6 @@
 import React from 'react';
 
 class AlbumItem extends React.Component {
-	
 	render() {
 		let {album, playAlbum} = this.props;
 		return (

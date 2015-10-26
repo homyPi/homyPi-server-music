@@ -1,12 +1,14 @@
 var playlistRoutes = require("./modules/playlist/playlistRoutes");
 var Music = require("./modules/music/Music");
+var MusicSource = require("./modules/sources/MusicSource");
+var PlaylistSource = require("./modules/sources/PlaylistSource");
 var musicRoutes = require("./modules/music/routes");
 module.exports = {
-	addSource: function(module, name) {
-		console.log("====== new source ======");
-		console.log(module);
-		console.log("========================");
-		Music.sources.push({module: module});
+	addMusicSource: function(module, name) {
+		MusicSource.sources.push({name: name, module: module});
+	},
+	addPlaylistSource: function(module, name) {
+		PlaylistSource.sources.push({name: name, module: module});
 	},
 	setSocket: function(socket) {
 		require("./modules/player/playerSocket")(socket);
@@ -15,8 +17,8 @@ module.exports = {
 		router.get("/", function(req, res) {
 			res.json({"name": "music", "status": "up"});
 		});
-		router.get("/sources", function(req, res) {
-			var sources = Music.sources.map(function(s) { return s.name});
+		router.get("/sources/music", function(req, res) {
+			var sources = MusicSource.sources.map(function(s) { return s.name});
 			res.json(sources);
 		});
 		musicRoutes(router);

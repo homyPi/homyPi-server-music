@@ -1,21 +1,10 @@
 var models = require(__base + 'models/mongoose/mongoose-models.js'),
 	Promise = require("bluebird");
-var Spotify = require(__base + "modules/spotify/Spotify");
 var _ = require("lodash");
+var MusicSource = require("../sources/MusicSource");
 
-var getModuleApi = function(module, user) {
-	return new Promise(function(resolve, reject) {
-		console.log(module);
-		if (typeof module.getApi === "function") {
-			module.getApi(user).then(resolve).catch(reject);
-		} else {
-			return resolve(null);
-		}
-	});
-}
 
 var Music = function() {"use strict"};
-Music.sources = [];
 Music.getMyArtists = function(user, options) {
 	if (!options) {
 		options = {};
@@ -63,7 +52,7 @@ Music.getRandomArtist = function(user, nb) {
 	});
 }
 
-Music.convertTrackTo = function(track, to, api) {
+Music.convertTrackTo = function(track, to) {
 	return new Promise(function(resolve, reject) {
 		if (to == "spotify") {
 			console.log("CONVERT TRACK TO SPOTIFY: artist name = " + track.artist_name + " title = " + track.title)
@@ -106,20 +95,19 @@ Music.convertTracksetTo = function(trackset, to, user) {
 	});
 }
 
-Music.search = function(source, query, user) {
+Music.search = function(query, user, options) {
+	options = options || {};
 	return new Promise(function(resolve, reject) {
-		var module = null;
-		_.forEach(Music.sources, function(s) {
-			if (s) {
-				module = s;
-			}
-		});
+		var module = MusicSource.getSourceModule(options.source);
 		if (!module) {
 			return reject("unknown source");
 		}
-		getModuleApi(module.module, user).then(function(api) {
-			api = api || module.module;
-			api.search(query).then(resolve).catch(reject);
+		MusicSource.getModuleApi(module, user).then(function(api) {
+			api.search(query, {
+				limit: options.limit,
+				offset: options.offset,
+				type: options.type
+			}).then(resolve).catch(reject);
 		}).catch(reject);
 		
 	});
