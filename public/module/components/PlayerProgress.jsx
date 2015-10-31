@@ -8,7 +8,7 @@ class Progress extends Component {
         this.percentage = 100;
     }
     handleSeekTrack(e) {
-        let { onSeekTrack, soundCloudAudio } = this.props;
+        let { onSeekTrack } = this.props;
         const xPos = (e.pageX - e.currentTarget.getBoundingClientRect().left) / e.currentTarget.offsetWidth;
         
         let value = Math.round(xPos * this.props.max);

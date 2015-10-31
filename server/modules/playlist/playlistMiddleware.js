@@ -67,7 +67,7 @@ var clearPlaylist = function(req, res) {
 };
 
 var generate = function(req, res) {
-	PlaylistGenerator.generate(req.user, "spotify")
+	PlaylistGenerator.generate(req.user, req.query.generator, req.query.musicSource, req.query)
 		.then(function(playlist) {
 			res.json({playlist: playlist});
 		}).catch(function(err) {

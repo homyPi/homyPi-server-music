@@ -103,6 +103,7 @@ module.exports = function(socket) {
 			socket.emit("playlist:track:progress", {trackOffset_ms: Playlist.trackOffset_ms})
 	});
 	socket.on("player:seek", function(data) {
-			socket.broadcast.emit("player:seek", {progress_ms: data.progress_ms})
+		console.log("seek");
+		socket.broadcast.emit("player:seek", {progress_ms: data.progress_ms})
 	});
 };

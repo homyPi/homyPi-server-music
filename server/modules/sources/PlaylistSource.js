@@ -3,6 +3,7 @@ var _ = require("lodash");
 
 var PlaylistSource = function() {"use strict";}
 PlaylistSource.sources = [];
+PlaylistSource.preferredSource = "spotify";
 
 PlaylistSource.getModuleApi = function(module, user) {
 	"use strict";
@@ -17,6 +18,7 @@ PlaylistSource.getModuleApi = function(module, user) {
 
 PlaylistSource.getSourceModule = function(sourceName) {
 	"use strict";
+	sourceName = sourceName || PlaylistSource.preferredSource;
 	var module = null;
 	_.forEach(PlaylistSource.sources, function(s) {
 		if (s.name === sourceName) {

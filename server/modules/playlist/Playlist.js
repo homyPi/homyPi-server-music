@@ -175,7 +175,14 @@ var setPlayingId = function(_id) {
 					return reject(err);
 				} else {
 					console.log("set idPlaying = " + _id);
-					process.io.sockets.emit("playlist:playing:id", {idPlaying: _id});
+					var track = {};
+					for(var i = 0; i < playlist.tracks.length; i++) {
+						if (playlist.tracks[i]._id == _id) {
+							track = playlist.tracks[i];
+							break;
+						}
+					}
+					process.io.sockets.emit("playlist:playing:id", {idPlaying: _id, track: track});
 					return resolve();
 				}
 			})
