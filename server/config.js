@@ -1,9 +1,8 @@
-var mongoose = require("mongoose");
-var Schema = mongoose.Schema;
+var Schema = require("mongoose").Schema;
 module.exports = {
 	"path": "music",
 	"schemas": {
-		artist: {
+		Artist: {
 			name: String,
 			images: Schema.Types.Mixed,
 			useItAsAlarm: Boolean,
@@ -13,7 +12,7 @@ module.exports = {
 			},
 			externals: {}
 		},
-		playlist: {
+		Playlist: {
 			idPlaying: String,
 			tracks: [{
 				_id: Schema.ObjectId,
@@ -38,8 +37,9 @@ module.exports = {
 			}]
 		}
 	},
-	"setSchemas": function(schemaDescriptions) {
-		mongoose.model('Artist', new Schema(schemaDescriptions.artist));
-		mongoose.model('Playlist', new Schema(schemaDescriptions.playlist));	
+	"setSchemas": function(schemaDescriptions, mongoose) {
+		console.log("set schemas Artist and Playlist");
+		//mongoose.model('Artist', new Schema(schemaDescriptions.artist));
+		//mongoose.model('Playlist', new Schema(schemaDescriptions.playlist));	
 	}
 }
