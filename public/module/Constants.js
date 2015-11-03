@@ -17,6 +17,9 @@ export default {
   MusicSearchActionTypes: keyMirror({
     SET_RESULTS: null
   }),
+  MusicActionTypes: keyMirror({
+    SET_SOURCES: null
+  }),
   PlaylistActionTypes: keyMirror({
     SET_PLAYLIST: null,
     ADD_TRACK: null,
