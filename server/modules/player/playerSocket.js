@@ -6,6 +6,7 @@ var Raspberry  = require(__base + "models/Raspberry");
 //var MusicGraph = require(__base + "modules/MusicGraph");
 var _ = require("lodash");
 var MusicSource = require("../sources/MusicSource");
+var PlaylistGenerator = require("../playlist/PlaylistGenerator")
 
 module.exports = function(socket) {
 	socket.on("player:generatePlaylist", function(request) {
@@ -53,22 +54,29 @@ module.exports = function(socket) {
 		});
 	});
 	socket.on("player:play:generated", function(data) {
-		MusicGraph.generatePlaylist(socket.decoded_token, data).then(function(playlist) {
-			var trackset = [];
-			for(var i = 0; i < playlist.length; i++) {
-				if (playlist[i].track) {
-					trackset.push({
-						source: "spotify",
-						uri: playlist[i].track.uri,
-						name: playlist[i].track.name
-					});
-				}
-			} 
-			console.log("SOCKET PLAYER GENERATE: got playlist: " + JSON.stringify(trackset, null, 4));
-			socket.broadcast.emit("player:play:trackset", {"trackset": trackset});
-		}).catch(function(err) {
-			socket.emit("error", err);
-		});
+		console.log("player:play:generated with:\n" + JSON.stringify(data, null, 2));
+		if(!data) {
+			data = {
+				options: {}
+			};
+		}
+		PlaylistGenerator.generate(socket.decoded_token, data.generator, data.musicSource, data.options)
+			.then(function(playlist) {
+				var trackset = [];
+				for(var i = 0; i < playlist.length; i++) {
+					if (playlist[i].track) {
+						trackset.push({
+							source: "spotify",
+							uri: playlist[i].track.uri,
+							name: playlist[i].track.name
+						});
+					}
+				} 
+				console.log("SOCKET PLAYER GENERATE: got playlist: " + JSON.stringify(trackset, null, 4));
+				socket.broadcast.emit("player:play:trackset", {"trackset": trackset});
+			}).catch(function(err) {
+				socket.emit("error", err);
+			});
 	});
 	socket.on("player:play:trackset", function(data) {
 		socket.broadcast.emit("player:play:trackset", data);

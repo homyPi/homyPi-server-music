@@ -1,7 +1,9 @@
 import React from 'react';
 import {AppCanvas, RaisedButton, DropDownMenu} from 'material-ui';
 import PlaylistStore from '../stores/PlaylistStore';
+import MusicStore from '../stores/MusicStore';
 import PlaylistActionCreators from '../actions/PlaylistActionCreators';
+import MusicActionCreators from '../actions/MusicActionCreators';
 var RaspberryActionCreators = window.raspberryActions;
 var RaspberryStore = window.raspberryStore;
 import PlayerActions from './PlayerActions';
@@ -15,8 +17,8 @@ export default React.createClass({
 	autoUpdateProgress: null,
 	_onRaspberryChange() {
 	    this.setState({
-	      raspberries: RaspberryStore.getAll().raspberries,
-	      selectedRaspberry : RaspberryStore.getAll().selectedRaspberry,
+	      	raspberries: RaspberryStore.getAll().raspberries,
+	      	selectedRaspberry : RaspberryStore.getAll().selectedRaspberry,
 			tracks: PlaylistStore.getAll().tracks
 	    });
 	    this.setGetTrackProgressInterval();
@@ -29,21 +31,41 @@ export default React.createClass({
 		});
 		this.setGetTrackProgressInterval();
 	},
+	_onMusicChange() {
+		var sources = MusicStore.getAll().sources;
+		var musicSource, playlistSource;
+		if(sources.music.length) {
+			musicSource = sources.music[0];
+		}
+		if(sources.playlist.length) {
+			playlistSource = sources.playlist[0];
+		}
+		console.log("!!!!!!!!!", sources, musicSource, playlistSource);
+		this.setState({
+			sources: sources,
+			musicSource: musicSource,
+			playlistSource: playlistSource
+		});
+		
+	},
 	getInitialState() {
 	   	RaspberryActionCreators.getAll();
 	   	PlaylistActionCreators.loadPlaylist();
+	   	MusicActionCreators.getSources();
 	    return {
 	      raspberries: RaspberryStore.getAll().raspberries,
 	      selectedRaspberry : RaspberryStore.getAll().selectedRaspberry,
 	      playing: PlaylistStore.getAll().playing,
 	      tracks: PlaylistStore.getAll().tracks,
 	      progress: PlaylistStore.getAll().progress,
+	      sources: MusicStore.getAll().sources,
 	      extended: false
 	    };
 	},
 	componentDidMount() {
 	    RaspberryStore.addChangeListener(this._onRaspberryChange);
 	    PlaylistStore.addChangeListener(this._onPlaylistChange);
+	    MusicStore.addChangeListener(this._onMusicChange);
 	    Io.socket.on("raspberry:new", function(data) {
 	    	RaspberryActionCreators.newRaspberry(data.raspberry);
 	    });
@@ -86,20 +108,33 @@ export default React.createClass({
 		}
 	},
 	render() {
-		let {raspberries, selectedRaspberry, playing, tracks, progress} = this.state;
+		let {
+			raspberries,
+			selectedRaspberry,
+			playing,
+			tracks,
+			progress,
+			sources
+		} = this.state;
 		let playerClassName  = "player";
 		if(this.state.extended) {
 			playerClassName += " extended";
 		}
+		let musicSourceMenu = sources.music.map(function(name) {
+			return { payload: name, text: name }
+		});
+		let playlistSourceMenu = sources.playlist.map(function(name) {
+			return { payload: name, text: name }
+		});
 		return (
-			<div className={playerClassName} style={(selectedRaspberry)? {display:"block"}:{display:"none"}} onClick={this._extend}>
+			<div className={playerClassName} style={(selectedRaspberry)? {display:"block"}:{display:"none"}}>
 				<div className="player-body">
 					<div className="player-header">
 						{(selectedRaspberry)? <PlayerActions raspberry={selectedRaspberry}/>:<div></div>}
 						{(playing)? 
 							<div className="playing-track">
 								<div className="track-info">
-									<img className="cover" src={playing.album.images[0].url} />
+									<img className="cover" src={playing.album.images[0].url}  onClick={this._extend}/>
 									<div className="info">
 										<span className="track-name">{playing.name}</span>
 										<span className="artist">{playing.artists.map(function(artist) { return (artist.name + "; ")})}</span>
@@ -113,6 +148,10 @@ export default React.createClass({
 						</div>: null}
 					</div>
 	        		<Playlist playing={playing} tracks={tracks} play={this._playTrack} removeTrack={this._removeTrack}/>
+					<h3>Music source</h3>
+					<DropDownMenu menuItems={musicSourceMenu} onChange={this._setMusicSource} />
+					<h3>Playlist source</h3>
+					<DropDownMenu menuItems={playlistSourceMenu} onChange={this._setPlaylistSource} />
 	        		<br />
 	        		<RaisedButton label="Generate a random playlist" onClick={this._generateRandomPlaylist}/>
         		</div>
@@ -159,10 +198,20 @@ export default React.createClass({
 	_generateRandomPlaylist(event) {
 		event.preventDefault();
 		event.stopPropagation();
-		Io.socket.emit("player:play:generated", {nbTracks: 5})
+		Io.socket.emit("player:play:generated", {
+				generator: this.state.playlistSource,
+				musicSource: this.state.musicSource,
+				options: {nbItems: 5}
+		})
 	},
 	_removeTrack(track) {
 		Io.socket.emit("player:playlist:remove", {_id: track._id});
+	},
+	_setMusicSource(event, selectedIndex, menuItem) {
+		this.setState({musicSource: menuItem.payload});
+	},
+	_setPlaylistSource(event, selectedIndex, menuItem) {
+		this.setState({playlistSource: menuItem.payload});
 	},
 	_extend() {
 		this.setState({

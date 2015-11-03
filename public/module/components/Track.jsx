@@ -30,7 +30,7 @@ export default React.createClass({
 				<div className="artists">
 					{(track.artists)?
 						track.artists.map(function(artist) {
-						return <a onClick={this._gotoArtist.bind(this, artist.id)}>{artist.name}</a>
+						return <a onClick={this._gotoArtist.bind(this, artist.id)}>{artist.name}; </a>
 					}.bind(this)):null}
 				</div>
 				<span className="actions">
