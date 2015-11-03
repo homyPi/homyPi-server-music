@@ -1,6 +1,6 @@
 module.exports = function(router) {
 	var musicMiddleware = require("./musicMiddleware");
-	var userMiddleware = require(__base + "middleware/user");
+	var userMiddleware = require("../Link").User.middleware;
 
 	router.get("/search", userMiddleware.isLoggedIn,  musicMiddleware.search);
 

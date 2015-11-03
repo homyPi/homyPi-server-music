@@ -2,8 +2,7 @@
  * Created by nolitsou on 9/8/15.
  */
 var Playlist  = require("../playlist/Playlist");
-var Raspberry  = require(__base + "models/Raspberry");
-//var MusicGraph = require(__base + "modules/MusicGraph");
+var Raspberry  = require("../Link").Raspberry;
 var _ = require("lodash");
 var MusicSource = require("../sources/MusicSource");
 

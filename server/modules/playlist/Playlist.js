@@ -1,4 +1,4 @@
-var PlaylistModel = require(__base + "models/mongoose/mongoose-models.js").Playlist;
+var PlaylistModel = require("../Link").MongooseModels.Playlist;
 var mongoose = require('mongoose');
 var _ = require("lodash");
 

@@ -4,9 +4,13 @@ var PlaylistGenerator = require("./PlaylistGenerator");
  * Get current trackset
  */
 var get = function(req, res) {
-	Playlist.get().then(function(playlist) {
-		res.json({playlist: {"trackset": playlist.tracks, "idPlaying": playlist.idPlaying}});
-	});
+	console.log("get playlist");
+	Playlist.get()
+		.then(function(playlist) {
+			res.json({playlist: {"trackset": playlist.tracks, "idPlaying": playlist.idPlaying}});
+		}).catch(function(err) {
+			res.json({err: err});
+		});
 };
 
 /**
