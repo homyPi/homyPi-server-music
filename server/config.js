@@ -37,9 +37,16 @@ module.exports = {
 			}]
 		}
 	},
-	"setSchemas": function(schemaDescriptions, mongoose) {
-		console.log("set schemas Artist and Playlist");
-		//mongoose.model('Artist', new Schema(schemaDescriptions.artist));
-		//mongoose.model('Playlist', new Schema(schemaDescriptions.playlist));	
-	}
+	"externals": [
+		{
+			baseSchema: "User",
+			name: "music",
+			schema: {
+				settings: {
+					preferredPlaylistSource: String,
+					preferredMusicSource: String
+				}
+			}
+		}
+	]
 }

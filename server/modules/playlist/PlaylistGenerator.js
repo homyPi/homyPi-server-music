@@ -29,25 +29,26 @@ PlaylistGenerator.generate = function(user, playlistSource, musicSource, options
 	options.nbItems = options.nbItems || 3
 	return new Promise(function(resolve, reject) {
 		console.log("GETTING module " + playlistSource);
-		var module = PlaylistSource.getSourceModule(playlistSource);
-		if (!module) {
-			return reject("unknown module");
-		}
-		Music.getMyArtists(user).then(function(myArtists) {
-			var instance = new module(myArtists, options);
-			instance.init(user).then(function() {
-				instance.generate()
-					.then(function() {
-						if(!musicSource || musicSource == playlistSource) {
-							resolve(instance.playlist);
-						} else {
-							PlaylistGenerator.convertTo(instance.playlist, musicSource, user)
-								.then(resolve)
-								.catch(reject);
-						}
+		PlaylistSource.getSourceModule(playlistSource, user)
+			.then(function(module) {
+				Music.getMyArtists(user).then(function(myArtists) {
+					var instance = new module(myArtists, options);
+					instance.init(user).then(function() {
+						instance.generate()
+							.then(function() {
+								if(!musicSource || musicSource == playlistSource) {
+									resolve(instance.playlist);
+								} else {
+									PlaylistGenerator.convertTo(instance.playlist, musicSource, user)
+										.then(resolve)
+										.catch(reject);
+								}
+							}).catch(reject);
 					}).catch(reject);
-			}).catch(reject);
-		}).catch(reject);
+				}).catch(reject);
+		}).catch(function(err) {
+			reject(err);
+		});
 	});
 };
 
