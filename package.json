@@ -56,6 +56,6 @@
   },
   "scripts": {
     "build": "./node_modules/.bin/babel ./public/module -d ./public/lib",
-    "postinstall": "node -e \"require('fs').stat('./public/lib', function (e, s) { process.exit(e || !s.isDirectory() ? 1 : 0) })\" || npm run build"
+    "postinstall": "node -e \"require('fs').stat('./public/lib', function (e, s) { process.exit(e || 0) })\" || npm run build"
   }
 }
