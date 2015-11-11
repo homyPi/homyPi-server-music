@@ -40,7 +40,6 @@ export default React.createClass({
 		if(sources.playlist.length) {
 			playlistSource = sources.playlist[0];
 		}
-		console.log("!!!!!!!!!", sources, musicSource, playlistSource);
 		this.setState({
 			sources: sources,
 			musicSource: musicSource,

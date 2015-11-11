@@ -10,7 +10,6 @@ function setHeaders(xhr) {
 
 export default {
 	getSources() {
-		console.log("get sources");
 		return new Promise((resolve, reject) => {
 			let url = serverUrl + "/sources";
 			$.ajax({
@@ -19,6 +18,44 @@ export default {
 					beforeSend: setHeaders,
 					success: function(resp) {
 						console.log("sources= ", resp);
+						resolve(resp);
+					},
+					fail: function(err) {
+						reject(err)
+					}
+				});
+		});
+	},
+	updateFavoriteMusicSource(musicSource) {
+		return new Promise((resolve, reject) => {
+			let url = serverUrl + "/sources/music";
+			$.ajax({
+					url: url,
+					type: "POST",
+					data: { 
+				        'source': musicSource
+				    },
+					beforeSend: setHeaders,
+					success: function(resp) {
+						resolve(resp);
+					},
+					fail: function(err) {
+						reject(err)
+					}
+				});
+		});
+	},
+	updateFavoritePlaylistSource(playlistSource) {
+		return new Promise((resolve, reject) => {
+			let url = serverUrl + "/sources/playlist";
+			$.ajax({
+					url: url,
+					type: "POST",
+					data: { 
+				        'source': playlistSource
+				    },
+					beforeSend: setHeaders,
+					success: function(resp) {
 						resolve(resp);
 					},
 					fail: function(err) {

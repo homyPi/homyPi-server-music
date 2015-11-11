@@ -6,11 +6,6 @@ export default {
 
   // Each time you add an action, add it here... They should be past-tense
   ActionTypes: keyMirror({
-    ALARM_ADDED: null,
-    SET_ALARMS: null,
-    DELETE_ALARM: null,
-    ADD_ALARM: null,
-    UPDATE_ALARM: null,
     SET_ARTIST: null,
     SET_MY_ARTISTS: null
   }),
@@ -18,7 +13,9 @@ export default {
     SET_RESULTS: null
   }),
   MusicActionTypes: keyMirror({
-    SET_SOURCES: null
+    SET_SOURCES: null,
+    SET_FAVORITE_MUSIC_SOURCES: null,
+    SET_FAVORITE_PLAYLIST_SOURCES: null
   }),
   PlaylistActionTypes: keyMirror({
     SET_PLAYLIST: null,

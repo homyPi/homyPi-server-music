@@ -19,13 +19,6 @@ module.exports = {
 		router.get("/", function(req, res) {
 			res.json({"name": "music", "status": "up"});
 		});
-		router.get("/sources", function(req, res) {
-			var sources = {
-				music: MusicSource.sources.map(function(s) { return s.name}),
-				playlist: PlaylistSource.sources.map(function(s) { return s.name})
-			}
-			res.json(sources);
-		});
 		musicRoutes(router);
 		playlistRoutes(router);
 		return router;

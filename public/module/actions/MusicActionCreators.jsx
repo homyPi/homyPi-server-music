@@ -14,5 +14,17 @@ export default {
 			.catch(function(err) {
 				
 			});
+	},
+	updateFavoritePlaylistSource(source) {
+		MusicAPI.updateFavoritePlaylistSource(source)
+			.then(function(results) {
+				Dispatcher.handleViewAction({
+			        type: Constants.MusicActionTypes.SET_FAVORITE_PLAYLIST_SOURCES,
+			      	newFavPlaylistSource: source
+			    });
+			})
+			.catch(function(err) {
+				
+			});
 	}
 }

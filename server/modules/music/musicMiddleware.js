@@ -1,4 +1,8 @@
 var Music = require("./Music");
+var MusicSource = require("../sources/MusicSource");
+var PlaylistSource = require("../sources/PlaylistSource");
+
+	var User = Link.MongooseModels.User
 
 
 var search = function(req, res) {
@@ -27,6 +31,46 @@ var search = function(req, res) {
 	});
 };
 
+
+var getSources = function(req, res) {
+	var sources = {
+		sources: {
+			music: MusicSource.sources.map(function(s) { return s.name}),
+			playlist: PlaylistSource.sources.map(function(s) { return s.name})
+		},
+		favorites: {
+			music: null,
+			playlist: null
+		}
+	}
+	PlaylistSource.getSource(req.user).then(function(playlistSourceName) {
+		if (req.user.externals && req.user.externals.music
+			&& req.user.externals.music.settings) {
+			sources.favorites = {
+				music: req.user.externals.music.settings.preferredMusicSource,
+				playlist: playlistSourceName
+			}
+		}
+		res.json(sources);
+	}).catch(function(err) {
+		res.json({err: err});
+	})
+};
+
+var setMusicSources = function(req, res) {
+	res.json({});
+}
+var setPlaylistSources = function(req, res) {
+	PlaylistSource.setPreferredSource(req.user, req.body.source).then(function() {
+		res.json({status: "success"});
+	}).catch(function(err) {
+		res.json({err: err});
+	})
+}
+
 module.exports = {
-	search: search
+	search: search,
+	getSources: getSources,
+	setMusicSources: setMusicSources,
+	setPlaylistSources: setPlaylistSources
 };
