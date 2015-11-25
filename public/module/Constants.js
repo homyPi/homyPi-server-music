@@ -14,6 +14,7 @@ export default {
   }),
   MusicActionTypes: keyMirror({
     SET_SOURCES: null,
+    SET_VOLUME: null,
     SET_FAVORITE_MUSIC_SOURCES: null,
     SET_FAVORITE_PLAYLIST_SOURCES: null
   }),
@@ -28,11 +29,11 @@ export default {
   UserActionTypes: keyMirror({
     LOGIN_SUCCESS: null
   }),
-  RaspberryActionTypes: keyMirror({
-    GET_ALL: null,
-    UPDATE_STATUS: null,
-    NEW: null,
-    REMOVE: null
+  PlayerActionTypes: keyMirror({
+    SET_LIST: null,
+    SET_PLAYER: null,
+    REMOVE_PLAYER: null,
+    UPDATE_STATUS: null
   }),
 
   ActionSources: keyMirror({

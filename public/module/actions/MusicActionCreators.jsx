@@ -15,6 +15,12 @@ export default {
 				
 			});
 	},
+	updateVolume(volume) {
+		Dispatcher.handleViewAction({
+		    type: Constants.MusicActionTypes.SET_VOLUME,
+		   	volume: volume
+		});
+	},
 	updateFavoritePlaylistSource(source) {
 		MusicAPI.updateFavoritePlaylistSource(source)
 			.then(function(results) {

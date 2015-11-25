@@ -6,6 +6,7 @@ import assign from 'object-assign';
 // data storage
 let sources = {music: [], playlist: []};
 let favSources = {};
+let volume = 50;
 
 
 function setSources(music, playlist, favMusicSource, favPlaylistSource) {
@@ -24,6 +25,10 @@ function setSources(music, playlist, favMusicSource, favPlaylistSource) {
   } else {
     favSources.playlist = favPlaylistSource;
   }
+}
+
+function setVolume(vol) {
+  volume = vol;
 }
 
 function setFavMusicSources(favMusicSource) {
@@ -50,7 +55,8 @@ const MusicStore = assign({}, BaseStore, {
   getAll() {
     return {
       sources: sources,
-      favSources: favSources
+      favSources: favSources,
+      volume: volume
     };
   },
 
@@ -67,6 +73,10 @@ const MusicStore = assign({}, BaseStore, {
           console.log(e);
           console.log(e.stack);
         }
+        break;
+      case Constants.MusicActionTypes.SET_SOURCES:
+        setVolume(action.volume);
+        MusicStore.emitChange();
         break;
       case Constants.MusicActionTypes.SET_FAVORITE_MUSIC_SOURCES:
         try {

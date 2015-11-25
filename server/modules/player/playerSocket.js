@@ -5,37 +5,68 @@ var Playlist  = require("../playlist/Playlist");
 var Raspberry  = require("../Link").Raspberry;
 var _ = require("lodash");
 var MusicSource = require("../sources/MusicSource");
-var PlaylistGenerator = require("../playlist/PlaylistGenerator")
+var PlaylistGenerator = require("../playlist/PlaylistGenerator");
+var Players = require("./Players");
 
-module.exports = function(socket) {
-	socket.on("player:generatePlaylist", function(request) {
-		MusicGraph.generatePlaylist(req.user)
-			.then(function (playlist) {
-				return res.json({playlist: playlist});
-			})
-			.catch(function (err) {
-				return res.json({err: err});
-			});
+module.exports = function(socket, io) {
+	socket.on("player:resume", function(data) {
+		if (!data.name) {
+			return;
+		}
+		var player = Players.get(data.name);
+		if (!player || !player.socketId) {
+			console.log("id unknown");
+			return;
+		}
+		console.log(player);
+		player.setStatus("PLAYING");
+		io.sockets.connected[player.socketId].emit("player:resume");
 	});
-	socket.on("player:resume", function() {
-		console.log("player:resume");
-		socket.broadcast.emit("player:resume");
+	socket.on("player:pause", function(data) {
+		if (!data.name) {
+			return;
+		}
+		var player = Players.get(data.name);
+		if (!player || !player.socketId) {
+			console.log("id unknown");
+			return;
+		}
+		player.setStatus("PAUSED");
+		io.sockets.connected[player.socketId].emit("player:pause");
 	});
-	socket.on("player:pause", function() {
-		console.log("player:pause");
-		socket.broadcast.emit("player:pause");
+	socket.on("player:next", function(data) {
+		if (!data.name) {
+			return;
+		}
+		var player = Players.get(data.name);
+		if (!player || !player.socketId) {
+			console.log("id unknown");
+			return;
+		}
+		io.sockets.connected[player.socketId].emit("player:next");
 	});
-	socket.on("player:next", function() {
-		console.log("player:next");
-		socket.broadcast.emit("player:next");
-	});
-	socket.on("player:previous", function() {
-		console.log("player:previous");
-		socket.broadcast.emit("player:previous");
+	socket.on("player:previous", function(data) {
+		if (!data.name) {
+			return;
+		}
+		var player = Players.get(data.name);
+		if (!player || !player.socketId) {
+			console.log("id unknown");
+			return;
+		}
+		io.sockets.connected[player.socketId].emit("player:previous");
 	});
 	socket.on("player:play:track", function(data) {
-		console.log("player:play  " + JSON.stringify(data));
-		socket.broadcast.emit("player:play:track", data);
+		if (!data.player || !data.player.name || !data.track) {
+			return;
+		}
+		var player = Players.get(data.player.name);
+		if (!player || !player.socketId) {
+			console.log("id unknown");
+			return;
+		}
+		console.log("player:play  " + JSON.stringify(data.track));
+		socket.broadcast.emit("player:play:track", data.track);
 	});
 	socket.on("player:play:album", function(data) {
 		var trackset = [];
@@ -54,10 +85,16 @@ module.exports = function(socket) {
 	});
 	socket.on("player:play:generated", function(data) {
 		console.log("player:play:generated with:\n" + JSON.stringify(data, null, 2));
-		if(!data) {
-			data = {
-				options: {}
-			};
+		if (!data.player || !data.player.name) {
+			return;
+		}
+		var player = Players.get(data.name);
+		if (!player || !player.socketId) {
+			console.log("id unknown");
+			return;
+		}
+		if(!data.options) {
+			data.options = {};
 		}
 		PlaylistGenerator.generate(socket.decoded_token, data.generator, data.musicSource, data.options)
 			.then(function(playlist) {
@@ -72,7 +109,7 @@ module.exports = function(socket) {
 					}
 				} 
 				console.log("SOCKET PLAYER GENERATE: got playlist: " + JSON.stringify(trackset, null, 4));
-				socket.broadcast.emit("player:play:trackset", {"trackset": trackset});
+				io.sockets.connected[player.socketId].emit("player:play:trackset", {"trackset": trackset});
 			}).catch(function(err) {
 				socket.emit("error", err);
 			});
@@ -85,23 +122,35 @@ module.exports = function(socket) {
 		socket.broadcast.emit("player:playlist:add", data);
 	});
 	socket.on("player:playlist:remove", function(data) {
-		console.log("player:playlist:remove  " + JSON.stringify(data));
-		socket.broadcast.emit("player:playlist:remove", {_id: data._id});
+		if (!data || !data.player || !data.player.name || !data._id) {
+			return;
+		}
+		var player = Players.get(data.name);
+		if (!player || !player.socketId) {
+			console.log("id unknown");
+			return;
+		}
+		io.sockets.connected[player.socketId].emit("player:playlist:remove", {_id: data._id});
 	});
 	socket.on("player:playing:id", function(data) {
 		console.log("player:playing:id  " + JSON.stringify(data));
 		Playlist.setPlayingId(data._id);
 	});
 	socket.on("player:status", function(request) {
-		for(var i = 0 ; i < Raspberry.connectedClients.length; i++) {
-			if (socket.id == Raspberry.connectedClients[i].socketId) {
-				Raspberry.connectedClients[i].playerStatus = request.status;
-			}
-		}
-		if(request.playingId) {
-			Playlist.setPlayingId(request.playingId);
-		}
-		socket.broadcast.emit("player:status:updated", {socketId: socket.id, status: request.status});
+		if (!socket.raspberryInfo || !socket.raspberryInfo.name) return;
+		Raspberry.findOne(socket.raspberryInfo.name)
+			.then(function(raspberry) {
+				var player = Players.get(raspberry.name);
+				if (!player) return;
+				player.setStatus(request.status);
+				if(request.playingId) {
+					Playlist.setPlayingId(request.playingId);
+				}
+				socket.broadcast.emit("player:status:updated", {name: raspberry.name, status: request.status});
+			}).catch(function(err) {
+				console.log(err);
+			});
+		
 	});
 	socket.on("playlist:track:progress", function(data) {
 		Playlist.trackOffset_ms = data.progress;
@@ -110,7 +159,14 @@ module.exports = function(socket) {
 			socket.emit("playlist:track:progress", {trackOffset_ms: Playlist.trackOffset_ms})
 	});
 	socket.on("player:seek", function(data) {
-		console.log("seek");
-		socket.broadcast.emit("player:seek", {progress_ms: data.progress_ms})
+		if (!data.player || !data.player.name || !data.progress_ms) {
+			return;
+		}
+		var player = Players.get(data.player.name);
+		if (!player || !player.socketId) {
+			console.log("id unknown");
+			return;
+		}
+		io.sockets.connected[player.socketId].emit("player:seek", {progress_ms: data.progress_ms})
 	});
 };

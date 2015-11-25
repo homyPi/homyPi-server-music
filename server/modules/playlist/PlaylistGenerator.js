@@ -36,9 +36,12 @@ PlaylistGenerator.generate = function(user, playlistSource, musicSource, options
 					instance.init(user).then(function() {
 						instance.generate()
 							.then(function() {
-								if(!musicSource || musicSource == playlistSource) {
+								if(!musicSource || musicSource == playlistSource || musicSource == "default") {
 									resolve(instance.playlist);
 								} else {
+									if (musicSource == "default") {
+										musicSource = null;
+									}
 									PlaylistGenerator.convertTo(instance.playlist, musicSource, user)
 										.then(resolve)
 										.catch(reject);

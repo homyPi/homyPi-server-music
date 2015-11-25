@@ -4,25 +4,20 @@ import PlaylistStore from '../stores/PlaylistStore';
 import MusicStore from '../stores/MusicStore';
 import PlaylistActionCreators from '../actions/PlaylistActionCreators';
 import MusicActionCreators from '../actions/MusicActionCreators';
-var RaspberryActionCreators = window.raspberryActions;
-var RaspberryStore = window.raspberryStore;
+
+import PlayerActionCreators from '../actions/PlayerActionCreators';
+import PlayerStore from '../stores/PlayerStore';
+
 import PlayerActions from './PlayerActions';
 import Playlist from './Playlist';
-import PlayerProgress from './PlayerProgress'
+import PlayerProgress from './PlayerProgress';
+import Volume from './Volume';
 
 var Io = window.io;
 
 export default React.createClass({
 	getProgressInterval: null,
 	autoUpdateProgress: null,
-	_onRaspberryChange() {
-	    this.setState({
-	      	raspberries: RaspberryStore.getAll().raspberries,
-	      	selectedRaspberry : RaspberryStore.getAll().selectedRaspberry,
-			tracks: PlaylistStore.getAll().tracks
-	    });
-	    this.setGetTrackProgressInterval();
-	},
 	_onPlaylistChange() {
 		this.setState({
 			playing: PlaylistStore.getAll().playing,
@@ -43,63 +38,55 @@ export default React.createClass({
 		this.setState({
 			sources: sources,
 			musicSource: musicSource,
-			playlistSource: playlistSource
+			playlistSource: playlistSource,
+			volume: MusicStore.getAll().volume
 		});
 		
 	},
 	getInitialState() {
-	   	RaspberryActionCreators.getAll();
 	   	PlaylistActionCreators.loadPlaylist();
 	   	MusicActionCreators.getSources();
+	   	var players = PlayerStore.getAll().players;
+		var pl;
+		if (players.length) {
+			pl = players[0];
+		}
 	    return {
-	      raspberries: RaspberryStore.getAll().raspberries,
-	      selectedRaspberry : RaspberryStore.getAll().selectedRaspberry,
-	      playing: PlaylistStore.getAll().playing,
-	      tracks: PlaylistStore.getAll().tracks,
-	      progress: PlaylistStore.getAll().progress,
-	      sources: MusicStore.getAll().sources,
-	      extended: false
+	     	player: pl,
+	      	playing: PlaylistStore.getAll().playing,
+	      	tracks: PlaylistStore.getAll().tracks,
+	      	progress: PlaylistStore.getAll().progress,
+	      	sources: MusicStore.getAll().sources,
+	      	extended: false,
+	      	volume: MusicStore.getAll().volume
 	    };
 	},
+	_onPlayerChange() {
+		var players = PlayerStore.getAll().players;
+		var pl;
+		if (players.length) {
+			pl = players[0];
+		}
+	    this.setState({
+	      	player : pl,
+			tracks: PlaylistStore.getAll().tracks
+	    });
+	    this.setGetTrackProgressInterval();
+	},
 	componentDidMount() {
-	    RaspberryStore.addChangeListener(this._onRaspberryChange);
+		PlayerStore.addChangeListener(() => {this._onPlayerChange()});
 	    PlaylistStore.addChangeListener(this._onPlaylistChange);
 	    MusicStore.addChangeListener(this._onMusicChange);
-	    Io.socket.on("raspberry:new", function(data) {
-	    	RaspberryActionCreators.newRaspberry(data.raspberry);
-	    });
-	    Io.socket.on("raspberry:remove", function(data) {
-	    	RaspberryActionCreators.removeRaspberry(data.socketId);
-	    });
-	    Io.socket.on("player:status:updated", function(data) {
-	    	RaspberryActionCreators.updateState(data.socketId, data.status);
-	    });
-	    Io.socket.on("playlist:track:added", function(data) {
-	    	if (data.track) {
-				PlaylistActionCreators.addTrack(data.track);
-	    	} else if (data.trackset) {
-	    		PlaylistActionCreators.addTrackset(data.trackset);
-	    	}
-		});
-		Io.socket.on("playlist:track:removed", function(data) {
-			PlaylistActionCreators.removeTrack(data._id);
-		});
-		Io.socket.on("playlist:track:clear", function(track) {
-			PlaylistActionCreators.clear();
-		});
-		Io.socket.on("playlist:playing:id", function(data) {
-			PlaylistActionCreators.updatePlayingId(data.idPlaying);
-		});
-		Io.socket.on("playlist:track:progress", function(data) {
-			PlaylistActionCreators.updateProgress(data.trackOffset_ms);
-		});
+	    
+	   	PlayerActionCreators.getAll();
+
 		this.setGetTrackProgressInterval();
 	},
 	componentWillUnmount() {
-	    RaspberryStore.removeChangeListener(this._onRaspberryChange);
 	    PlaylistStore.removeChangeListener(this._onPlaylistChange);
 	    if (this.getProgressInterval) {
-			clearInterval(this.getProgressInterval);				this.getProgressInterval = null;
+			clearInterval(this.getProgressInterval);				
+			this.getProgressInterval = null;
 		}
 		if (this.autoUpdateProgress) {
 			clearInterval(this.autoUpdateProgress)
@@ -108,8 +95,7 @@ export default React.createClass({
 	},
 	render() {
 		let {
-			raspberries,
-			selectedRaspberry,
+			player,
 			playing,
 			tracks,
 			progress,
@@ -125,11 +111,12 @@ export default React.createClass({
 		let playlistSourceMenu = sources.playlist.map(function(name) {
 			return { payload: name, text: name }
 		});
+        console.log("NEW PLAYER: ", player);
 		return (
-			<div className={playerClassName} style={(selectedRaspberry)? {display:"block"}:{display:"none"}}>
+			<div className={playerClassName} style={(player)? {display:"block"}:{display:"none"}}>
 				<div className="player-body">
 					<div className="player-header">
-						{(selectedRaspberry)? <PlayerActions raspberry={selectedRaspberry}/>:<div></div>}
+						{(player)? <PlayerActions player={player}/>:<div></div>}
 						{(playing)? 
 							<div className="playing-track">
 								<div className="track-info">
@@ -140,25 +127,29 @@ export default React.createClass({
 									</div>
 								</div>
 								<div className="track-progress">
-									<PlayerProgress value={progress.progressMs} min={0}  max={playing.durationMs} onSeekTrack={this._seek}/>
+									<PlayerProgress value={progress.progressMs} min={0}  max={playing.durationMs} onSeekTrack={(value, event) => {this._seek(value, event)}}/>
 									<span className="time">{progress.minutes}:{progress.seconds}/{playing.durationStr}</span>
 								</div>
 								
+								
 						</div>: null}
+						<div className="volume-container">
+							<Volume value={this.state.volume} setVolume={(value, event) => {this._volume(value, event)} }/>
+						</div>
 					</div>
-	        		<Playlist playing={playing} tracks={tracks} play={this._playTrack} removeTrack={this._removeTrack}/>
+	        		<Playlist playing={playing} tracks={tracks} play={this._playTrack} removeTrack={(track) => {this._removeTrack(track)}}/>
 					<h3>Music source</h3>
 					<DropDownMenu menuItems={musicSourceMenu} onChange={this._setMusicSource} />
 					<h3>Playlist source</h3>
 					<DropDownMenu menuItems={playlistSourceMenu} onChange={this._setPlaylistSource} />
 	        		<br />
-	        		<RaisedButton label="Generate a random playlist" onClick={this._generateRandomPlaylist}/>
+	        		<RaisedButton label="Generate a random playlist" onClick={(event) => {this._generateRandomPlaylist(event)}}/>
         		</div>
 			</div>
 		);
 	},
 	setGetTrackProgressInterval() {
-		if (this.state.selectedRaspberry && this.state.selectedRaspberry.status === "PLAYING") {
+		if (this.state.player && this.state.player.status === "PLAYING") {
 			if (!this.getProgressInterval) {
 				Io.socket.emit("playlist:track:progress:get");
 				this.getProgressInterval = setInterval(function(){
@@ -182,14 +173,20 @@ export default React.createClass({
 			}
 		}
 	},
-	_setSelectedRaspberry(e, selectedIndex, menuItem) {
-		RaspberryActionCreators.setSelectedRaspberry(menuItem);
-	},
 	_seek(value, event) {
 		event.preventDefault();
 		event.stopPropagation();
-		Io.socket.emit("player:seek", {progress_ms: value});
+		let {player} = this.state;
+		Io.socket.emit("player:seek", {player: {name: player.name}, progress_ms: value});
 		PlaylistActionCreators.updateProgress(value);
+	},
+	_volume(value, event) {
+		event.preventDefault();
+		event.stopPropagation();
+		this.setState({volume: value});
+		let {player} = this.state;
+		Io.socket.emit("player:volume", {player: {name: player.name}, volume: value});
+		MusicActionCreators.updateVolume(value);
 	},
 	_playTrack(track) {
 
@@ -197,14 +194,17 @@ export default React.createClass({
 	_generateRandomPlaylist(event) {
 		event.preventDefault();
 		event.stopPropagation();
+		let {player} = this.state;
 		Io.socket.emit("player:play:generated", {
+				player: {name: player.name},
 				generator: this.state.playlistSource,
 				musicSource: this.state.musicSource,
 				options: {nbItems: 5}
 		})
 	},
 	_removeTrack(track) {
-		Io.socket.emit("player:playlist:remove", {_id: track._id});
+		let {player} = this.state;
+		Io.socket.emit("player:playlist:remove", {player: {name: player.name}, _id: track._id});
 	},
 	_setMusicSource(event, selectedIndex, menuItem) {
 		this.setState({musicSource: menuItem.payload});
