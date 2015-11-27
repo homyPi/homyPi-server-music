@@ -12,6 +12,12 @@ export default {
       			});
 			});
 	},
+	setSelected(raspberryName) {
+		Dispatcher.handleViewAction({
+			type: Constants.PlayerActionTypes.SET_SELECTED,
+			name: raspberryName
+      	});
+	},
 	addPlayer(name, module) {
 		Dispatcher.handleViewAction({
 			type: Constants.PlayerActionTypes.SET_PLAYER,

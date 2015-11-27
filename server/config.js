@@ -13,6 +13,7 @@ module.exports = {
 			externals: {}
 		},
 		Playlist: {
+			raspberryName: String,
 			idPlaying: String,
 			tracks: [{
 				_id: Schema.ObjectId,

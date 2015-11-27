@@ -36,7 +36,6 @@ export default React.createClass({
 		let {player} = this.props;
 		let statusAction = null;
 
-		console.log("IN PLAYER ACTION:", player)
 		if (player) {
 			if (player.status === "PLAYING") {
 				statusAction = (<i onClick={this.pause} className="material-icons pause-icon">pause_arrow</i>)

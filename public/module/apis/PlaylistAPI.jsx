@@ -10,10 +10,10 @@ function setHeaders(xhr) {
 
 export default {
 
-	loadPlaylist() {
+	loadPlaylist(raspberry) {
 		return new Promise((resolve, reject) => {
 			$.ajax({
-					url: serverUrl + "/",
+					url: serverUrl + "/" + raspberry.name,
 					type: "GET",
 					beforeSend: setHeaders,
 					success: function(resp) {

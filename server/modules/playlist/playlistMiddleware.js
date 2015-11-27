@@ -5,7 +5,7 @@ var PlaylistGenerator = require("./PlaylistGenerator");
  */
 var get = function(req, res) {
 	console.log("get playlist");
-	Playlist.get()
+	Playlist.get({name: req.params.raspberryName})
 		.then(function(playlist) {
 			res.json({playlist: {"trackset": playlist.tracks, "idPlaying": playlist.idPlaying}});
 		}).catch(function(err) {
@@ -18,7 +18,7 @@ var get = function(req, res) {
  * @param {ObjectId} req.params.trackId Id of the track to delete
  */
 var deleteTrack = function(req, res) {
-	Playlist.deleteTrack(req.params.trackId).then(function() {
+	Playlist.deleteTrack({raspberry: {name: req.params.raspberryName}}, req.params.trackId).then(function() {
 		res.json({status: "success"});
 	}).catch(function(err) {
 		res.json({err: err});
@@ -28,8 +28,8 @@ var deleteTrack = function(req, res) {
 
 var add = function(req, res) {
 	var data = req.body;
-	console.log("MIDDLEWARE_ADD_PLAYLIST: get playlist");
-	Playlist.get().then(function(playlist) {
+	console.log("MIDDLEWARE_ADD_PLAYLIST: get playlist for " + req.params.raspberryName);
+	Playlist.get({name: req.params.raspberryName}).then(function(playlist) {
 		console.log("MIDDLEWARE_ADD_PLAYLIST: got playlist");
 		if (data.track) {
 			console.log("MIDDLEWARE_ADD_PLAYLIST: add track");
@@ -60,7 +60,7 @@ var add = function(req, res) {
  * Remove al tracks from trackset
  */
 var clearPlaylist = function(req, res) {
-	Playlist.clearPlaylist().then(function() {
+	Playlist.clearPlaylist({name: req.params.raspberryName}).then(function() {
 		console.log("CLEAR_PLAYLIST: done");
 		res.json({"status": "success"});
 	}).catch(function(err) {

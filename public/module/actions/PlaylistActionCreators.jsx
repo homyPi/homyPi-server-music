@@ -3,8 +3,8 @@ import Constants from '../Constants';
 import PlaylistAPI from '../apis/PlaylistAPI';
 
 export default {
-  loadPlaylist() {
-    PlaylistAPI.loadPlaylist().then(function(playlist){
+  loadPlaylist(raspberry) {
+    PlaylistAPI.loadPlaylist(raspberry).then(function(playlist){
       Dispatcher.handleViewAction({
         type: Constants.PlaylistActionTypes.SET_PLAYLIST,
         tracks: playlist.trackset,

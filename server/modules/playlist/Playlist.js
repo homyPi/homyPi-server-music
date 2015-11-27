@@ -5,18 +5,25 @@ var _ = require("lodash");
 var MusicSource = require("../sources/MusicSource");
 
 
-var initPlaylist = function(tracks) {
+var initPlaylist = function(raspberry, tracks) {
 	return new Promise(function(resolve, reject) {
+		console.log("INIT PLAYLIST for " + raspberry.name);
 		var playlist = new PlaylistModel();
+		playlist.raspberryName = raspberry.name;
 		playlist._id = mongoose.Types.ObjectId();
 		playlist.tracks = tracks || [];
 		if (tracks) {
 			playlist.idPlaying = 0;
 		}
+
+		console.log("INIT PLAYLIST saving")
 		playlist.save(function(err) {
 			if (err) {
+				console.log("err")
+				console.log(err);
 				return reject(err);
 			} else {
+				console.log("done")
 				return resolve(playlist);
 			}
 		});
@@ -71,15 +78,18 @@ var getTracksData = function(user, tracks, musicSource) {
 		})
 	});
 }
-var get = function() {
+var get = function(raspberry) {
 	return new Promise(function(resolve, reject) {
-		PlaylistModel.findOne({}, function(err, playlist) {
+		console.log("GET PLAYLIST: start for " + raspberry.name)
+		PlaylistModel.findOne({raspberryName: raspberry.name}, function(err, playlist) {
 			if (err) {
 				return reject(err);
 			} else {
 				if (!playlist) {
-					initPlaylist().then(resolve).catch(reject);
+					console.log("no playlist for " + raspberry.name);
+					initPlaylist(raspberry).then(resolve).catch(reject);
 				} else {
+					console.log("got playlist for " + raspberry.name)
 					resolve(playlist);
 				}
 			}
@@ -104,9 +114,9 @@ var addTrack = function(user, track, playlist) {
 		}).catch(reject);
 	});
 };
-var deleteTrack = function(trackId) {
+var deleteTrack = function(raspberry, trackId) {
 	return new Promise(function(resolve, reject) {
-		get().then(function(playlist) {
+		get(raspberry).then(function(playlist) {
 			for(var i = 0; i < playlist.tracks.length; i++) {
 				if (playlist.tracks[i]._id.equals(trackId)) {
 					console.log("found track to delete " + playlist.tracks[i]);
@@ -145,10 +155,10 @@ var addTrackset = function(user, trackset, playlist) {
 		}).catch(reject);
 	});
 };
-var clearPlaylist = function() {
+var clearPlaylist = function(raspberry) {
 	console.log("clearPlaylist");
 	return new Promise(function(resolve, reject) {
-		get().then(function(playlist) {
+		get(raspberry).then(function(playlist) {
 			console.log("got playlist");
 			playlist.tracks = [];
 			playlist.save(function(err) {
@@ -164,9 +174,9 @@ var clearPlaylist = function() {
 		}).catch(reject);
 	});
 }
-var setPlayingId = function(_id) {
+var setPlayingId = function(raspberry, _id) {
 	return new Promise(function(resolve, reject) {
-		get().then(function(playlist) {
+		get(raspberry).then(function(playlist) {
 			playlist.idPlaying = _id;
 			playlist.save(function(err) {
 				if (err) {

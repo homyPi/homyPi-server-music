@@ -27,6 +27,8 @@ export default React.createClass({
 		this.setGetTrackProgressInterval();
 	},
 	_onMusicChange() {
+		let {player} = this.state;
+		if (!player) return;
 		var sources = MusicStore.getAll().sources;
 		var musicSource, playlistSource;
 		if(sources.music.length) {
@@ -43,13 +45,18 @@ export default React.createClass({
 		});
 		
 	},
+	getPlaylist() {
+		console.log("player get playlist");
+		let {player} = this.state;
+		if (!player) return;
+	   	PlaylistActionCreators.loadPlaylist(player);
+
+	},
 	getInitialState() {
-	   	PlaylistActionCreators.loadPlaylist();
 	   	MusicActionCreators.getSources();
-	   	var players = PlayerStore.getAll().players;
-		var pl;
-		if (players.length) {
-			pl = players[0];
+	   	var pl = PlayerStore.getAll().selected;
+	   	if (pl) {
+	   		getPlaylist();
 		}
 	    return {
 	     	player: pl,
@@ -62,16 +69,13 @@ export default React.createClass({
 	    };
 	},
 	_onPlayerChange() {
-		var players = PlayerStore.getAll().players;
-		var pl;
-		if (players.length) {
-			pl = players[0];
-		}
+		var player = PlayerStore.getAll().selected;
 	    this.setState({
-	      	player : pl,
+	      	player : player,
 			tracks: PlaylistStore.getAll().tracks
 	    });
 	    this.setGetTrackProgressInterval();
+	    this.getPlaylist();
 	},
 	componentDidMount() {
 		PlayerStore.addChangeListener(() => {this._onPlayerChange()});
@@ -111,7 +115,8 @@ export default React.createClass({
 		let playlistSourceMenu = sources.playlist.map(function(name) {
 			return { payload: name, text: name }
 		});
-        console.log("NEW PLAYER: ", player);
+		if (player)
+		console.log("referesh player view (status = " + player.status+ ")");
 		return (
 			<div className={playerClassName} style={(player)? {display:"block"}:{display:"none"}}>
 				<div className="player-body">

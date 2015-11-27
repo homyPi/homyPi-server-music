@@ -4,6 +4,9 @@ import {TextField, FlatButton, Tabs, Tab} from 'material-ui';
 
 import MusicSearchStore from '../stores/MusicSearchStore';
 import MusicSearchActions from '../actions/MusicSearchActionCreators';
+
+import PlayerStore from '../stores/PlayerStore';
+import PlayerActions from '../actions/PlayerActionCreators';
 import Track from "./Track";
 import AlbumItem from "./AlbumItem";
 import ArtistItem from "./ArtistItem";
@@ -19,12 +22,16 @@ export default React.createClass({
 	      artists: MusicSearchStore.getAll().artists
 	    });
     },
+    _onPlayerChange() {
+    	this.setState({player: PlayerStore.getAll().selected});
+    },
 	  getInitialState() {
 	  	let search = "";
 	  	if (this.props.params && this.props.params.search) {
 			search = this.props.params.search;
 		}
 	    return {
+	      player: PlayerStore.getAll().selected,
 	      tracks: MusicSearchStore.getAll().tracks,
 	      albums: MusicSearchStore.getAll().albums,
 	      artists: MusicSearchStore.getAll().artists,
@@ -34,16 +41,19 @@ export default React.createClass({
 	  },
   	componentDidMount() {
 	  	MusicSearchStore.addChangeListener(this._onChange);
+	  	PlayerStore.addChangeListener(this._onPlayerChange);
     	if (this.state.search != "") {
 	    	this._handleSearch();
 	    }
   	},
   	componentWillUnmount() {
     	MusicSearchStore.removeChangeListener(this._onChange);
+	  	PlayerStore.removeChangeListener(this._onPlayerChange);
   	},
 
 	render() {
 		let {tracks, albums, artists} = this.state;
+		console.log("IN SEARCH MUSIC, player = ", this.state.player);
 		return (
 			<div id="search">
 				<form className="search-form">
@@ -62,7 +72,7 @@ export default React.createClass({
 			  			
 			  			{(tracks.items)?
 				  			tracks.items.map(result =>
-					          <Track key={result._id} track={result} playTrack={this._playTrack} addTrack={this._addTrackInPlaylist}/>
+					          <Track key={result._id} track={result} playTrack={(track) => {this._playTrack(track)}} addTrack={this._addTrackInPlaylist}/>
 				            ): null
 				        }
 					</Tab>
@@ -94,16 +104,22 @@ export default React.createClass({
 		);
 	},
 	_setSeachType(type) {
+		let {player} = this.state;
+		if(!player) return;
 		this.setState({searchType: type});
 	},
 	_playAlbum (album) {
-		Io.socket.emit("player:play:album", {id: album.id}); 
+		let {player} = this.state;
+		if(!player) return;
+		Io.socket.emit("player:play:album", {player: {name: player.name}, id: album.id}); 
 	},
 	_playTrack(track) {
-		Io.socket.emit("player:play:track", {"source": "spotify", "uri": track.uri});
+		let {player} = this.state;
+		if(!player) return;
+		Io.socket.emit("player:play:track", {player: {name: player.name}, "track": {"source": "spotify", "uri": track.uri}});
 	},
 	_addTrackInPlaylist(track) {
-		Io.socket.emit("player:playlist:add", {"track": {"uri": track.uri, "source": "spotify"}});
+		Io.socket.emit("player:playlist:add", {player: {name: player.name}, "track": {"uri": track.uri, "source": "spotify"}});
 	},
 	_handleSearchChange(event) {
 		this.setState({search: event.target.value});

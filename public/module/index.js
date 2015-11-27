@@ -6,12 +6,16 @@ var Link = require("./Link");
 
 
 module.exports = {
-	link: function(functions) {
-		
+	link: function(links) {
+		links.watchRaspberry(function(event, data) {
+			if (event === links.RASPBERRY_EVENTS.SELECTED_CHANGED) {
+				if (data.selected && data.selected.name)
+					PlayerActionCreators.setSelected(data.selected.name);
+			}
+		})
 	},
 	setSocket: function(socket) {
 		socket.on("player:status:updated", function(data) {
-	    	console.log("player:status:updated", data);
 	    	PlayerActionCreators.updateState(data.name, data.status);
 	    });
 	    socket.on("playlist:track:added", function(data) {
@@ -34,8 +38,6 @@ module.exports = {
 			PlaylistActionCreators.updateProgress(data.trackOffset_ms);
 		});
 		socket.on("modules:new:player", function(data) {
-			/*{raspberry: raspberry, module: moduleInfo}*/
-			console.log("new playerrrrrrrrr", data)
 			PlayerActionCreators.addPlayer(data.raspberry.name, data.module);
 		});
 		socket.on("modules:remove:player", function(data) {

@@ -58,6 +58,7 @@ module.exports = function(socket, io) {
 	});
 	socket.on("player:play:track", function(data) {
 		if (!data.player || !data.player.name || !data.track) {
+			console.log("missing data for 'player:play:track'")
 			return;
 		}
 		var player = Players.get(data.player.name);
@@ -66,7 +67,7 @@ module.exports = function(socket, io) {
 			return;
 		}
 		console.log("player:play  " + JSON.stringify(data.track));
-		socket.broadcast.emit("player:play:track", data.track);
+		io.sockets.connected[player.socketId].emit("player:play:track", data.track);
 	});
 	socket.on("player:play:album", function(data) {
 		var trackset = [];
@@ -144,7 +145,7 @@ module.exports = function(socket, io) {
 				if (!player) return;
 				player.setStatus(request.status);
 				if(request.playingId) {
-					Playlist.setPlayingId(request.playingId);
+					Playlist.setPlayingId(socket.raspberryInfo, request.playingId);
 				}
 				socket.broadcast.emit("player:status:updated", {name: raspberry.name, status: request.status});
 			}).catch(function(err) {

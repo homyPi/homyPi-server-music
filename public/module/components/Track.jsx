@@ -8,7 +8,7 @@ export default React.createClass({
 		let actions = [];
 		let classes = "track";
 		if (playTrack) {
-			actions.push(<i onClick={playTrack.bind(null,track)} className="material-icons">play_arrow</i>);
+			actions.push(<i onClick={() => {playTrack(track)}} className="material-icons">play_arrow</i>);
 		}
 		if (addTrack) {
 			actions.push(<i onClick={addTrack.bind(null,track)} className="material-icons">playlist_add</i>);

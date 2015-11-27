@@ -31,6 +31,10 @@ function removeItemById(_id) {
   }
 }
 function setPlaying(idPlaying) {
+  if (!idPlaying && _data.length) {
+    playing = _data[0];
+    return;
+  }
   _data.forEach(function(track) {
     if (idPlaying == track._id) {
       playing = track;
