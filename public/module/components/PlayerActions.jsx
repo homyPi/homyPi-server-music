@@ -2,10 +2,12 @@ import React, {PropTypes} from 'react';
 import {AppCanvas, FontIcon, RaisedButton, DropDownMenu} from 'material-ui';
 
 
-
-var Io = window.io;
+var Io = null;
 
 export default React.createClass({
+	componentWillMount() {
+		Io = window.io;
+	},
 	resume(event) {
 		let {player} = this.props;
 		console.log("resume to ", player);

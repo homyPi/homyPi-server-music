@@ -31,6 +31,7 @@ function removeItemById(_id) {
   }
 }
 function setPlaying(idPlaying) {
+  playing = null;
   if (!idPlaying && _data.length) {
     playing = _data[0];
     return;

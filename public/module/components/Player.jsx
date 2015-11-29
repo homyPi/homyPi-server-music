@@ -13,8 +13,7 @@ import Playlist from './Playlist';
 import PlayerProgress from './PlayerProgress';
 import Volume from './Volume';
 
-var Io = window.io;
-
+var Io = null;
 export default React.createClass({
 	getProgressInterval: null,
 	autoUpdateProgress: null,
@@ -76,6 +75,9 @@ export default React.createClass({
 	    });
 	    this.setGetTrackProgressInterval();
 	    this.getPlaylist();
+	},
+	componentWillMount() {
+		Io = window.io;
 	},
 	componentDidMount() {
 		PlayerStore.addChangeListener(() => {this._onPlayerChange()});

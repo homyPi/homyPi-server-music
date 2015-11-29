@@ -7,10 +7,21 @@ var Link = require("./Link");
 
 module.exports = {
 	link: function(links) {
+		let {selectedRaspberry} = links.getRaspberries();
+		Link.getRaspberries = links.getRaspberries;
+		if (selectedRaspberry && selectedRaspberry.name) {
+			PlayerActionCreators.setSelected(data.selected.name);
+			PlaylistActionCreators.loadPlaylist(data.selected);
+				
+		}
 		links.watchRaspberry(function(event, data) {
+			console.log("raspberry event", event, data);
 			if (event === links.RASPBERRY_EVENTS.SELECTED_CHANGED) {
-				if (data.selected && data.selected.name)
+				if (data.selected && data.selected.name) {
+					console.log("raspberry changed", data);
 					PlayerActionCreators.setSelected(data.selected.name);
+					PlaylistActionCreators.loadPlaylist(data.selected);
+				}
 			}
 		})
 	},
@@ -39,6 +50,12 @@ module.exports = {
 		});
 		socket.on("modules:new:player", function(data) {
 			PlayerActionCreators.addPlayer(data.raspberry.name, data.module);
+			let {selectedRaspberry} = Link.getRaspberries();
+			if (selectedRaspberry && selectedRaspberry.name
+					&& selectedRaspberry.name === data.raspberry.name) {
+				PlayerActionCreators.setSelected(data.selected.name);
+				PlaylistActionCreators.loadPlaylist(data.selected);
+			}
 		});
 		socket.on("modules:remove:player", function(data) {
 			PlayerActionCreators.removePlayer(data.raspberry.name, data.module);

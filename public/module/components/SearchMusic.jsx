@@ -10,8 +10,8 @@ import PlayerActions from '../actions/PlayerActionCreators';
 import Track from "./Track";
 import AlbumItem from "./AlbumItem";
 import ArtistItem from "./ArtistItem";
-var Io = window.io;
 import {History} from "react-router"
+var Io;
 
 export default React.createClass({
 	mixins: [ History ],
@@ -39,6 +39,9 @@ export default React.createClass({
 	      searchType: "track"
 	    };
 	  },
+	componentWillMount() {
+		Io = window.io;
+	},
   	componentDidMount() {
 	  	MusicSearchStore.addChangeListener(this._onChange);
 	  	PlayerStore.addChangeListener(this._onPlayerChange);
@@ -116,6 +119,7 @@ export default React.createClass({
 	_playTrack(track) {
 		let {player} = this.state;
 		if(!player) return;
+		console.log("play on ", player);
 		Io.socket.emit("player:play:track", {player: {name: player.name}, "track": {"source": "spotify", "uri": track.uri}});
 	},
 	_addTrackInPlaylist(track) {

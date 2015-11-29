@@ -1,9 +1,12 @@
 import React, {PropTypes} from 'react';
 import {AppCanvas, RaisedButton, Styles} from 'material-ui';
 import Track from "./Track";
-var Io = window.io;
+var Io;
 
 export default React.createClass({
+	componentWillMount() {
+		Io = window.io;
+	},
 	render() {
 		let {tracks, playing, play, removeTrack} = this.props;
 		
