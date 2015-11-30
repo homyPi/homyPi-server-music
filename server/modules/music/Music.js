@@ -1,4 +1,4 @@
-var models = require(__base + 'models/mongoose/mongoose-models.js'),
+var models = require("../Link").MongooseModels;
 	Promise = require("bluebird");
 var _ = require("lodash");
 var MusicSource = require("../sources/MusicSource");
