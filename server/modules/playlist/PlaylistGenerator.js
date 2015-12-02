@@ -26,6 +26,7 @@ PlaylistGenerator.generate = function(user, playlistSource, musicSource, options
 	if (!options) {
 		options = {};
 	}
+	console.log("PlaylistGenerator.generate options: " + options);
 	options.nbItems = options.nbItems || 3
 	return new Promise(function(resolve, reject) {
 		console.log("GETTING module " + playlistSource);

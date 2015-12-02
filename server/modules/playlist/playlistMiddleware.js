@@ -71,6 +71,7 @@ var clearPlaylist = function(req, res) {
 };
 
 var generate = function(req, res) {
+	console.log("middleware playlist generate");
 	PlaylistGenerator.generate(req.user, req.query.generator, req.query.musicSource, req.query)
 		.then(function(playlist) {
 			res.json({playlist: playlist});

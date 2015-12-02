@@ -1,10 +1,13 @@
-var models = require("../Link").MongooseModels;
-	Promise = require("bluebird");
+var Promise = require("bluebird");
 var _ = require("lodash");
 var MusicSource = require("../sources/MusicSource");
-
+var models;
 
 var Music = function() {"use strict"};
+Music.init = function(Link) {
+	models = Link.MongooseModels;
+}
+
 Music.getMyArtists = function(user, options) {
 	if (!options) {
 		options = {};

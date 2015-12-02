@@ -48,6 +48,7 @@ module.exports = {
 				console.log(IO);
 				IO.emit("modules:new:player", {raspberry: raspberry, module: moduleInfo});
 			}
-		})
+		});
+		Music.init(Link);
 	}
 }

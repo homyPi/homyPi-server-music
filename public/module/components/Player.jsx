@@ -55,7 +55,7 @@ export default React.createClass({
 	   	MusicActionCreators.getSources();
 	   	var pl = PlayerStore.getAll().selected;
 	   	if (pl) {
-	   		getPlaylist();
+	   		this.getPlaylist();
 		}
 	    return {
 	     	player: pl,
