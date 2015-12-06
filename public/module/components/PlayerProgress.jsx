@@ -8,6 +8,7 @@ class Progress extends Component {
         this.percentage = 100;
     }
     handleSeekTrack(e) {
+        if (!e.currentTarget) return;
         let { onSeekTrack } = this.props;
         const xPos = (e.pageX - e.currentTarget.getBoundingClientRect().left) / e.currentTarget.offsetWidth;
         

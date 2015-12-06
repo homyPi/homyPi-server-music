@@ -26,8 +26,6 @@ export default React.createClass({
 		this.setGetTrackProgressInterval();
 	},
 	_onMusicChange() {
-		let {player} = this.state;
-		if (!player) return;
 		var sources = MusicStore.getAll().sources;
 		var musicSource, playlistSource;
 		if(sources.music.length) {
@@ -52,6 +50,7 @@ export default React.createClass({
 
 	},
 	getInitialState() {
+		console.log("getInitialState!!!!");
 	   	MusicActionCreators.getSources();
 	   	var pl = PlayerStore.getAll().selected;
 	   	if (pl) {
@@ -69,7 +68,9 @@ export default React.createClass({
 	},
 	_onPlayerChange() {
 		var player = PlayerStore.getAll().selected;
-	    this.setState({
+		console.log("_onPlayerChange  ", player)
+		if (!player) return;
+		this.setState({
 	      	player : player,
 			tracks: PlaylistStore.getAll().tracks
 	    });
@@ -78,15 +79,15 @@ export default React.createClass({
 	},
 	componentWillMount() {
 		Io = window.io;
-	},
-	componentDidMount() {
-		PlayerStore.addChangeListener(() => {this._onPlayerChange()});
+		PlayerStore.addChangeListener(this._onPlayerChange.bind(this));
 	    PlaylistStore.addChangeListener(this._onPlaylistChange);
 	    MusicStore.addChangeListener(this._onMusicChange);
-	    
-	   	PlayerActionCreators.getAll();
+	    PlayerActionCreators.getAll();
 
 		this.setGetTrackProgressInterval();
+	},
+	componentDidMount() {
+		console.log("componentDidMount!!!!");
 	},
 	componentWillUnmount() {
 	    PlaylistStore.removeChangeListener(this._onPlaylistChange);
@@ -117,8 +118,7 @@ export default React.createClass({
 		let playlistSourceMenu = sources.playlist.map(function(name) {
 			return { payload: name, text: name }
 		});
-		if (player)
-		console.log("referesh player view (status = " + player.status+ ")");
+		console.log("MUSIC SRC = ", musicSourceMenu, playlistSourceMenu);
 		return (
 			<div className={playerClassName} style={(player)? {display:"block"}:{display:"none"}}>
 				<div className="player-body">
@@ -145,12 +145,16 @@ export default React.createClass({
 						</div>
 					</div>
 	        		<Playlist playing={playing} tracks={tracks} play={this._playTrack} removeTrack={(track) => {this._removeTrack(track)}}/>
+					{/*
+	        		*/}
 					<h3>Music source</h3>
-					<DropDownMenu menuItems={musicSourceMenu} onChange={this._setMusicSource} />
+					<DropDownMenu menuItems={musicSourceMenu} onChange={this._setMusicSource} autoWidth={false}/>
 					<h3>Playlist source</h3>
-					<DropDownMenu menuItems={playlistSourceMenu} onChange={this._setPlaylistSource} />
+
+					<DropDownMenu menuItems={playlistSourceMenu} onChange={this._setPlaylistSource} autoWidth={false}/>
 	        		<br />
 	        		<RaisedButton label="Generate a random playlist" onClick={(event) => {this._generateRandomPlaylist(event)}}/>
+	        	
         		</div>
 			</div>
 		);

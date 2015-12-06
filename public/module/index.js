@@ -8,6 +8,7 @@ var Link = require("./Link");
 module.exports = {
 	link: function(links) {
 		let {selectedRaspberry} = links.getRaspberries();
+		console.log("In music index ", selectedRaspberry);
 		Link.getRaspberries = links.getRaspberries;
 		if (selectedRaspberry && selectedRaspberry.name) {
 			PlayerActionCreators.setSelected(data.selected.name);
@@ -15,7 +16,7 @@ module.exports = {
 				
 		}
 		links.watchRaspberry(function(event, data) {
-			console.log("raspberry event", event, data);
+			console.log("In music index ", event, data);
 			if (event === links.RASPBERRY_EVENTS.SELECTED_CHANGED) {
 				if (data.selected && data.selected.name) {
 					console.log("raspberry changed", data);
