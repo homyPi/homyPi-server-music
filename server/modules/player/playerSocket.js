@@ -89,7 +89,7 @@ module.exports = function(socket, io) {
 		if (!data.player || !data.player.name) {
 			return;
 		}
-		var player = Players.get(data.name);
+		var player = Players.get(data.player.name);
 		if (!player || !player.socketId) {
 			console.log("id unknown");
 			return;
