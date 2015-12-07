@@ -70,7 +70,14 @@ function setSelected (name) {
       selected = getPlayer(selectedName);
     }
   }
-
+}
+function setVolume(name, volume) {
+  console.log("set volume for " + name + " to " + volume);
+  var player = getPlayer(name);
+  console.log("for player ", player);
+  if (player) {
+    player.volume = volume;
+  }
 }
 
 // data storage
@@ -110,6 +117,10 @@ const PlayerStore = assign({}, BaseStore, {
         let nameUpdated = action.name;
         let status = action.status;
         updateStatus(nameUpdated, status);
+        PlayerStore.emitChange();
+        break;
+      case Constants.PlayerActionTypes.SET_VOLUME:
+        setVolume(action.name, action.volume);
         PlayerStore.emitChange();
         break;
       default:

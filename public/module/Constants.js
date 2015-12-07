@@ -34,7 +34,8 @@ export default {
     SET_PLAYER: null,
     REMOVE_PLAYER: null,
     UPDATE_STATUS: null,
-    SET_SELECTED: null
+    SET_SELECTED: null,
+    SET_VOLUME: null
   }),
 
   ActionSources: keyMirror({

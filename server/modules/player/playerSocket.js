@@ -157,7 +157,30 @@ module.exports = function(socket, io) {
 		Playlist.trackOffset_ms = data.progress;
 	});
 	socket.on("playlist:track:progress:get", function(data) {
-			socket.emit("playlist:track:progress", {trackOffset_ms: Playlist.trackOffset_ms})
+		socket.emit("playlist:track:progress", {trackOffset_ms: Playlist.trackOffset_ms})
+	});
+	socket.on("player:volume:set", function(data) {
+		console.log("player:volume:set with " + JSON.stringify(data));
+		if (!data || !data.player || !data.player.name ||
+			!data.volume || isNaN(data.volume)) {
+			console.log("invalid data");
+			return;
+		}
+		var player = Players.get(data.player.name);
+		if (!player || !player.socketId) {
+			console.log("id unknown");
+			return;
+		}
+		io.sockets.connected[player.socketId].emit("player:volume:set", {volume: data.volume})
+	});
+	socket.on("player:volume:isSet", function(data) {
+		if (!socket.raspberryInfo || !socket.raspberryInfo.name) return;
+		data.player = {name: socket.raspberryInfo.name};
+		var player = Players.get(data.player.name);
+		if (!player) return;
+
+		player.volume = data.volume;
+		socket.broadcast.emit("player:volume:isSet", data);
 	});
 	socket.on("player:seek", function(data) {
 		if (!data.player || !data.player.name || !data.progress_ms) {

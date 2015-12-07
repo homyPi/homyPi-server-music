@@ -43,7 +43,7 @@ module.exports = {
 				Players.remove(raspberry.name);
 				IO.emit("modules:remove:player", {raspberry: raspberry, module: moduleInfo});
 			} else if (module.state === "UP") {
-				Players.new(raspberry.name, raspberry.socketId, moduleInfo.status, moduleInfo.progress);
+				Players.new(raspberry.name, raspberry.socketId, moduleInfo.status, moduleInfo.progress, moduleInfo.volume);
 				console.log("emit modules:new:player");
 				console.log(IO);
 				IO.emit("modules:new:player", {raspberry: raspberry, module: moduleInfo});

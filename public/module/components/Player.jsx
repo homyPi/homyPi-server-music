@@ -62,8 +62,7 @@ export default React.createClass({
 	      	tracks: PlaylistStore.getAll().tracks,
 	      	progress: PlaylistStore.getAll().progress,
 	      	sources: MusicStore.getAll().sources,
-	      	extended: false,
-	      	volume: MusicStore.getAll().volume
+	      	extended: false
 	    };
 	},
 	_onPlayerChange() {
@@ -141,7 +140,7 @@ export default React.createClass({
 								
 						</div>: null}
 						<div className="volume-container">
-							<Volume value={this.state.volume} setVolume={(value, event) => {this._volume(value, event)} }/>
+							{(player)? <Volume value={player.volume || 0} setVolume={(value, event) => {this._volume(value, event)} }/>:<div></div>}
 						</div>
 					</div>
 	        		<Playlist playing={playing} tracks={tracks} play={this._playTrack} removeTrack={(track) => {this._removeTrack(track)}}/>
@@ -196,8 +195,9 @@ export default React.createClass({
 		event.stopPropagation();
 		this.setState({volume: value});
 		let {player} = this.state;
-		Io.socket.emit("player:volume", {player: {name: player.name}, volume: value});
-		MusicActionCreators.updateVolume(value);
+		console.log("player:volume:set", {player: {name: player.name}, volume: value});
+		Io.socket.emit("player:volume:set", {player: {name: player.name}, volume: value});
+		PlayerActionCreators.setVolume(player.name, value);
 	},
 	_playTrack(track) {
 

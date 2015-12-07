@@ -61,6 +61,10 @@ module.exports = {
 		socket.on("modules:remove:player", function(data) {
 			PlayerActionCreators.removePlayer(data.raspberry.name, data.module);
 		});
+		socket.on("player:volume:isSet", function(data) {
+			console.log("!!!!!!!!!!!!!!!!!! player:volume:isSet", data)
+			PlayerActionCreators.setVolume(data.player.name, data.volume);
+		})
 	},
 	config: require("./config"),
 	actions: require("./actions"),

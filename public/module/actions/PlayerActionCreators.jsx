@@ -38,5 +38,12 @@ export default {
 			name: name,
 			status: status
       	});
+	},
+	setVolume(name, volume) {
+		Dispatcher.handleViewAction({
+			type: Constants.PlayerActionTypes.SET_VOLUME,
+			name: name,
+			volume: volume
+      	});
 	}
 }
