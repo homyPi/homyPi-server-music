@@ -25,11 +25,10 @@ export default {
 			module: module
       	});
 	},
-	removePlayer(name, module) {
+	removePlayer(name) {
 		Dispatcher.handleViewAction({
 			type: Constants.PlayerActionTypes.REMOVE_PLAYER,
-			name: name,
-			module: module
+			name: name
       	});
 	},
 	updateState(name, status) {

@@ -16,13 +16,23 @@ module.exports = {
 				
 		}
 		links.watchRaspberry(function(event, data) {
+			console.log("Raspberry event ", event, data);
 			console.log("In music index ", event, data);
-			if (event === links.RASPBERRY_EVENTS.SELECTED_CHANGED) {
-				if (data.selected && data.selected.name) {
-					console.log("raspberry changed", data);
-					PlayerActionCreators.setSelected(data.selected.name);
-					PlaylistActionCreators.loadPlaylist(data.selected);
-				}
+			switch(event) {
+				case links.RASPBERRY_EVENTS.SELECTED_CHANGED:
+					if (data.selected && data.selected.name) {
+						console.log("raspberry changed", data);
+						PlayerActionCreators.setSelected(data.selected.name);
+						PlaylistActionCreators.loadPlaylist(data.selected);
+					}
+					break;
+				case links.RASPBERRY_EVENTS.DISCONNECTED:
+					if (data && data.name) {
+						PlayerActionCreators.removePlayer(data.name);
+					}
+					break;
+				default:
+					break;
 			}
 		})
 	},

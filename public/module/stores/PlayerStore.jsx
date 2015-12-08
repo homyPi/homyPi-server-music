@@ -22,7 +22,7 @@ function addPlayer(name, module) {
   }
   setSelected(selectedName);
 }
-function removePlayer(name, module) {
+function removePlayer(name) {
   var i = getPlayerIndex(name);
   if (i > -1) {
       players.splice(i, 1);
@@ -110,7 +110,7 @@ const PlayerStore = assign({}, BaseStore, {
         PlayerStore.emitChange();
         break;
       case Constants.PlayerActionTypes.REMOVE_PLAYER:
-        removePlayer(action.name, action.module);
+        removePlayer(action.name);
         PlayerStore.emitChange();
         break;
       case Constants.PlayerActionTypes.UPDATE_STATUS:

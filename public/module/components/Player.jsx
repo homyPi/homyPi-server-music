@@ -68,7 +68,10 @@ export default React.createClass({
 	_onPlayerChange() {
 		var player = PlayerStore.getAll().selected;
 		console.log("_onPlayerChange  ", player)
-		if (!player) return;
+		if (!player) {
+			this.setState({player : player});
+			return;
+		}
 		this.setState({
 	      	player : player,
 			tracks: PlaylistStore.getAll().tracks
