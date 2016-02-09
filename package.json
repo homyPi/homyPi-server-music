@@ -56,7 +56,7 @@
     "webpack-dev-middleware": "^1.2.0"
   },
   "scripts": {
-    "build": "./node_modules/.bin/babel ./public/module -d ./public/lib",
+    "build": "babel ./public/module -d ./public/lib",
     "postinstall": "node -e \"require('fs').stat('./public/lib', function (e, s) { process.exit(e || 0) })\"; npm run build"
   }
 }
