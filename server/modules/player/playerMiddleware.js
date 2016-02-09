@@ -9,7 +9,14 @@ var getAll = function(req, res) {
 		}
 	});
 };
+var get = function(req, res) {
+	var player = Players.get(req.params.name);
+	res.json({
+		status: "success", data: player
+	});
+};
 
 module.exports = {
 	getAll: getAll,
+	get: get
 };

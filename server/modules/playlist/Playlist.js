@@ -114,26 +114,6 @@ var addTrack = function(user, track, playlist) {
 		}).catch(reject);
 	});
 };
-var deleteTrack = function(raspberry, trackId) {
-	return new Promise(function(resolve, reject) {
-		get(raspberry).then(function(playlist) {
-			for(var i = 0; i < playlist.tracks.length; i++) {
-				if (playlist.tracks[i]._id.equals(trackId)) {
-					console.log("found track to delete " + playlist.tracks[i]);
-					playlist.tracks.splice(i, 1);
-					break;
-				}
-			}
-			playlist.save(function(err) {
-				if (err) {
-					return reject(err);
-				}
-				process.io.sockets.emit("playlist:track:removed", {_id:trackId});
-				return resolve();
-			})
-		}).catch(reject);
-	});
-}
 var addTrackset = function(user, trackset, playlist) {
 	return new Promise(function(resolve, reject) {
 		getTracksData(user, trackset).then(function(trackset) {
@@ -154,7 +134,27 @@ var addTrackset = function(user, trackset, playlist) {
 			});
 		}).catch(reject);
 	});
-};
+};;
+var deleteTrack = function(raspberry, trackId) {
+	return new Promise(function(resolve, reject) {
+		get(raspberry).then(function(playlist) {
+			for(var i = 0; i < playlist.tracks.length; i++) {
+				if (playlist.tracks[i]._id.equals(trackId)) {
+					console.log("found track to delete " + playlist.tracks[i]);
+					playlist.tracks.splice(i, 1);
+					break;
+				}
+			}
+			playlist.save(function(err) {
+				if (err) {
+					return reject(err);
+				}
+				process.io.sockets.emit("playlist:track:removed", {_id:trackId});
+				return resolve();
+			})
+		}).catch(reject);
+	});
+}
 var clearPlaylist = function(raspberry) {
 	console.log("clearPlaylist");
 	return new Promise(function(resolve, reject) {
@@ -167,7 +167,7 @@ var clearPlaylist = function(raspberry) {
 					console.log(err);
 					return reject(err);
 				} else {
-					process.io.sockets.emit("playlist:track:clear");
+					process.io.sockets.emit("playlist:track:clear", {raspberry: playlist.raspberryName});
 					return resolve();
 				}
 			})
@@ -192,7 +192,7 @@ var setPlayingId = function(raspberry, _id) {
 							break;
 						}
 					}
-					process.io.sockets.emit("playlist:playing:id", {idPlaying: _id, track: track});
+					process.io.sockets.emit("playlist:playing:id", {idPlaying: _id, track: track, raspberry: playlist.raspberryName});
 					return resolve();
 				}
 			})

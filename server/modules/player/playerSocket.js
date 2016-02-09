@@ -58,7 +58,7 @@ module.exports = function(socket, io) {
 	});
 	socket.on("player:play:track", function(data) {
 		if (!data.player || !data.player.name || !data.track) {
-			console.log("missing data for 'player:play:track'")
+			console.log("missing data for 'player:play:track': " + JSON.stringify(data, null, 2));
 			return;
 		}
 		var player = Players.get(data.player.name);
@@ -157,6 +157,7 @@ module.exports = function(socket, io) {
 		Playlist.trackOffset_ms = data.progress;
 	});
 	socket.on("playlist:track:progress:get", function(data) {
+		console.log("playlist:track:progress:get", Playlist.trackOffset_ms);
 		socket.emit("playlist:track:progress", {trackOffset_ms: Playlist.trackOffset_ms})
 	});
 	socket.on("player:volume:set", function(data) {
@@ -174,11 +175,17 @@ module.exports = function(socket, io) {
 		io.sockets.connected[player.socketId].emit("player:volume:set", {volume: data.volume})
 	});
 	socket.on("player:volume:isSet", function(data) {
-		if (!socket.raspberryInfo || !socket.raspberryInfo.name) return;
+		console.log("player:volume:isSet", JSON.stringify(data, null, 2))
+		if (!socket.raspberryInfo || !socket.raspberryInfo.name) {
+			console.log("missing raspberryInfo");
+			return;
+		}
 		data.player = {name: socket.raspberryInfo.name};
 		var player = Players.get(data.player.name);
-		if (!player) return;
-
+		if (!player) {
+			console.log("unknown player");
+			return;
+		}
 		player.volume = data.volume;
 		socket.broadcast.emit("player:volume:isSet", data);
 	});

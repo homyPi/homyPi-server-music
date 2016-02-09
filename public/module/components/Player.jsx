@@ -120,9 +120,17 @@ export default React.createClass({
 		let playlistSourceMenu = sources.playlist.map(function(name) {
 			return { payload: name, text: name }
 		});
+		let playerStyle = {};
+		if (player) {
+			playerStyle.display = "block";
+			if (this.state.extended)
+				playerStyle.overflowY = "auto";
+		} else {
+			playerStyle.display = "none"
+		}
 		console.log("MUSIC SRC = ", musicSourceMenu, playlistSourceMenu);
 		return (
-			<div className={playerClassName} style={(player)? {display:"block"}:{display:"none"}}>
+			<div className={playerClassName} style={playerStyle}>
 				<div className="player-body">
 					<div className="player-header">
 						{(player)? <PlayerActions player={player}/>:<div></div>}
