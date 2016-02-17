@@ -70,15 +70,26 @@ module.exports = function(socket, io) {
 		io.sockets.connected[player.socketId].emit("player:play:track", data.track);
 	});
 	socket.on("player:play:album", function(data) {
+		if (!data.player || !data.player.name || !data.album || !data.album.id) {
+			console.log("missing data for 'player:play:album': " + JSON.stringify(data, null, 2));
+			return;
+		}
+		var player = Players.get(data.player.name);
+		if (!player || !player.socketId) {
+			console.log("id unknown");
+			return;
+		}
 		var trackset = [];
 		var Spotify = MusicSource.getSourceModule("spotify");
 
 		Spotify.getApi(socket.decoded_token).then(function(api) {
-			api.getAlbumTracks(data.id).then(function(response) {
+			api.getAlbumTracks(data.album.id).then(function(response) {
 				_.forEach(response.body.items, function(item) {
 					trackset.push({"source": "spotify", "uri": item.uri});
 				});
-				socket.broadcast.emit("player:play:trackset", {trackset: trackset});
+				console.log("play: " + JSON.stringify(trackset, null, 2));
+				console.log("on player " + player.name);
+				io.sockets.connected[player.socketId].emit("player:play:trackset", {trackset: trackset});
 			}).catch(function(err) {
 				console.log(err);
 			});

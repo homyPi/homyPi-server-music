@@ -45,6 +45,18 @@
     ```
     Play a track
 
+*   **player:play:album**:  
+    ```  
+    Arguments = {  
+            player: {
+                name: String //Player name  
+            },
+            id: Album id
+    }  
+    ```
+    Play an album
+    
+
 # Events
 
 *   **playlist:track:clear**: Playlist emptied
