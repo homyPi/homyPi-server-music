@@ -13,7 +13,7 @@ var search = function(req, res) {
 	var options = {
 		source: req.query.source,
 		limit: req.query.limit || 10,
-		offset: req.query.offset || 1,
+		offset: req.query.offset || 0,
 		type: req.query.type
 	}
 	console.log("!!!!!!!!!!!!!!!!!!");
