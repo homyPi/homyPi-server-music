@@ -1,4 +1,4 @@
-var PlaylistModel = require("../Link").MongooseModels.Playlist;
+var PlaylistModel = require("../../link").getShared().MongooseModels.Playlist;
 var mongoose = require('mongoose');
 var _ = require("lodash");
 
@@ -107,7 +107,7 @@ var addTrack = function(user, track, playlist) {
 					return reject(err);
 				} else {
 					console.log("PLAYLIST_ADD_TRACK: saved");
-					process.io.sockets.emit("playlist:track:added", {track:track});
+					process.messager.emit("client:" + playlist.raspberryName,"playlist:track:added", {track:track});
 					return resolve(track);
 				}
 			})
@@ -128,7 +128,7 @@ var addTrackset = function(user, trackset, playlist) {
 					console.log(err);
 					return reject(err);
 				} else {
-					process.io.sockets.emit("playlist:track:added", {trackset:trackset});
+					process.messager.emit("client:" + playlist.raspberryName,"playlist:track:added", {trackset:trackset});
 					return resolve(playlist);
 				}
 			});
@@ -149,7 +149,7 @@ var deleteTrack = function(raspberry, trackId) {
 				if (err) {
 					return reject(err);
 				}
-				process.io.sockets.emit("playlist:track:removed", {_id:trackId});
+				process.messager.emit("client:"+raspberry.name, "playlist:track:removed", {_id:trackId});
 				return resolve();
 			})
 		}).catch(reject);
@@ -167,13 +167,65 @@ var clearPlaylist = function(raspberry) {
 					console.log(err);
 					return reject(err);
 				} else {
-					process.io.sockets.emit("playlist:track:clear", {raspberry: playlist.raspberryName});
+					process.messager.emit("client:"+raspberry.name, "playlist:track:clear", {raspberry: playlist.raspberryName});
 					return resolve();
 				}
 			})
 		}).catch(reject);
 	});
 }
+
+var setPlaylist = function(user, playlist, data) {
+	return new Promise((resolve, reject) => {
+		playlist.tracks = [];
+		if (data.source) {
+			console.log("SET_PLAYLIST: get module... ");
+			var module = MusicSource.getSourceModule(data.source);
+			module.getApi(user).then(function(api) {
+				if (data.track) {
+					console.log("SET_PLAYLIST: get track data ");
+					api.getTrack(data.track.serviceId).then(function(track) {
+						console.log("GET_TRACK: got track data: " + JSON.stringify(data.track, null, 4));
+						playlist.tracks.push(track);
+						playlist.idPlaying = track._id;
+						console.log("SET_PLAYLIST: saving playlist");
+						playlist.save(function(err) {
+							if (err)
+								return reject(err);
+							process.messager.emit("client:" + playlist.raspberryName,"playlist:set", {playlist: playlist});
+							return resolve(playlist);
+						});
+					}).catch(function(err) {
+						console.log("GET_TRACK: error in getTrack: " + err);
+						console.log("GET_TRACK: error was for track uri = " + data.track.uri);
+						return reject(err);
+					});
+				} else if (data.album) {
+					api.getAlbum(data.album.serviceId).then(function(album) {
+						playlist.tracks = album.tracks.items || [];
+						playlist.idPlaying = (playlist.tracks.length)? playlist.tracks[0]._id: null;
+						playlist.save(function(err) {
+							if (err)
+								return reject(err);
+							process.messager.emit("client:" + playlist.raspberryName,"playlist:set", {playlist: playlist});
+							return resolve(playlist);
+						})
+					}).catch(function(err) {
+						console.log("GET_ALBUM: error in getAlbum: " + err);
+						console.log("GET_ALBUM: error was for track uri = " + data.album.uri);
+						return reject(err);
+					});
+				} else {
+					return reject("Missing one of parameter ('track' or 'album')");
+				}
+
+			});
+		} else {
+			return reject("Missing parameter 'source' (got: " + JSON.stringify(data) + ")");
+		}
+	})
+}
+
 var setPlayingId = function(raspberry, _id) {
 	return new Promise(function(resolve, reject) {
 		get(raspberry).then(function(playlist) {
@@ -192,7 +244,6 @@ var setPlayingId = function(raspberry, _id) {
 							break;
 						}
 					}
-					process.io.sockets.emit("playlist:playing:id", {idPlaying: _id, track: track, raspberry: playlist.raspberryName});
 					return resolve();
 				}
 			})
@@ -200,16 +251,32 @@ var setPlayingId = function(raspberry, _id) {
 	});
 };
 
-trackOffset_ms = 0;
+var getTrack = function(raspberryName, id) {
+	return new Promise(function(resolve, reject) {
+		get({name: raspberryName}).then(playlist => {
+			if (!playlist || !playlist.tracks || !playlist.tracks) {
+				return resolve(undefined);
+			}
+			return resolve(playlist.tracks.find(item => {
+				return (item._id == id);
+			}));
+
+		}).catch(reject);
+	});
+};
+
+var trackOffset_ms = 0;
 
 
 module.exports = {
-	initPlaylist: initPlaylist,
-	get: get,
-	addTrack: addTrack,
-	addTrackset: addTrackset,
-	deleteTrack: deleteTrack,
-	clearPlaylist: clearPlaylist,
-	setPlayingId: setPlayingId,
-	trackOffset_ms: trackOffset_ms
+	initPlaylist,
+	get,
+	getTrack,
+	addTrack,
+	addTrackset,
+	setPlaylist,
+	deleteTrack,
+	clearPlaylist,
+	setPlayingId,
+	trackOffset_ms
 };

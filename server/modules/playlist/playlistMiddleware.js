@@ -1,5 +1,6 @@
 var Playlist = require("./Playlist");
 var PlaylistGenerator = require("./PlaylistGenerator");
+var mongoose = require('mongoose');
 /**
  * Get current trackset
  */
@@ -7,7 +8,7 @@ var get = function(req, res) {
 	console.log("get playlist");
 	Playlist.get({name: req.params.raspberryName})
 		.then(function(playlist) {
-			res.json({playlist: {"trackset": playlist.tracks, "idPlaying": playlist.idPlaying}});
+			res.json({playlist: {"tracks": playlist.tracks, "idPlaying": playlist.idPlaying}});
 		}).catch(function(err) {
 			res.json({err: err});
 		});
@@ -46,6 +47,9 @@ var add = function(req, res) {
 			console.log("MIDDLEWARE_ADD_PLAYLIST: add trackset");
 			Playlist.addTrackset(req.user, data.trackset, playlist)
 				.then(function(playlist) {
+					playlist.tracks.map(item => {
+						item._id = mongoose.Types.ObjectId();
+					});
 					res.json({trackset: playlist.tracks});
 				}).catch(function(err) {
 					console.log(err);
@@ -54,8 +58,46 @@ var add = function(req, res) {
 		} else {
 			res.json({err: "invalid request"});
 		}
+	}).catch(function(error) {
+		console.log(error);
+		res.json({status: "error", error});
 	});
 }
+
+var setPlaylist = function(req, res) {
+	var data = req.body;
+	console.log("MIDDLEWARE_SET_PLAYLIST: get playlist for " + req.params.raspberryName);
+	Playlist.get({name: req.params.raspberryName}).then(function(playlist) {
+		console.log("MIDDLEWARE_SET_PLAYLIST: set playlist... ");
+		Playlist.setPlaylist(req.user, playlist, data)
+			.then(function(playlist) {
+				res.json({
+					status: "success",
+					playlist
+				});
+			}).catch(function(error) {
+				console.log(error);
+				res.json({status: "error", error});
+			});
+	}).catch(function(error) {
+		console.log(error);
+		res.json({status: "error", error});
+	});
+}
+
+var getTrack = function(req, res) {
+	if (!req.params.raspberryName || !req.params.id) {
+		return res.json({status: "error", error: "invalid request"});
+	}
+	Playlist.getTrack(req.params.raspberryName, req.params.id)
+		.then(track => {
+			return res.json({status: "success", track});
+		})
+		.catch(error => {
+			return res.json({status: "error", error});
+		})
+}
+
 /**
  * Remove al tracks from trackset
  */
@@ -82,10 +124,13 @@ var generate = function(req, res) {
 		})
 }
 
+
 module.exports = {
-	get: get,
-	deleteTrack: deleteTrack,
-	add: add,
-	clearPlaylist: clearPlaylist,
-	generate: generate
+	get,
+	setPlaylist,
+	getTrack,
+	deleteTrack,
+	add,
+	clearPlaylist,
+	generate
 }

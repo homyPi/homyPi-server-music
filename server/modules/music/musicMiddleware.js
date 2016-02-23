@@ -2,8 +2,6 @@ var Music = require("./Music");
 var MusicSource = require("../sources/MusicSource");
 var PlaylistSource = require("../sources/PlaylistSource");
 
-	var User = Link.MongooseModels.User
-
 
 var search = function(req, res) {
 	if (!req.query || !req.query.q) {
@@ -30,6 +28,23 @@ var search = function(req, res) {
 		return res.json({err: err});
 	});
 };
+
+var getAlbum = function(req, res) {
+	Music.getAlbum(req.user, req.params.source, req.params.id)
+		.then(function(response) {
+			res.json({
+				status: "success",
+				data: response
+			})
+		}).catch(function(err) {
+			console.log(err);
+			console.log(err.stack);
+			res.json({
+				status: "error",
+				error: err
+			});
+		})
+}
 
 
 var getSources = function(req, res) {
@@ -70,6 +85,7 @@ var setPlaylistSources = function(req, res) {
 
 module.exports = {
 	search: search,
+	getAlbum: getAlbum,
 	getSources: getSources,
 	setMusicSources: setMusicSources,
 	setPlaylistSources: setPlaylistSources

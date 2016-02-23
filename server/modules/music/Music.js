@@ -2,10 +2,9 @@ var Promise = require("bluebird");
 var _ = require("lodash");
 var MusicSource = require("../sources/MusicSource");
 var models;
-
 var Music = function() {"use strict"};
-Music.init = function(Link) {
-	models = Link.MongooseModels;
+Music.init = function(Shared) {
+	models = Shared.MongooseModels;
 }
 
 Music.getMyArtists = function(user, options) {
@@ -112,7 +111,31 @@ Music.search = function(query, user, options) {
 				type: options.type
 			}).then(resolve).catch(reject);
 		}).catch(reject);
-		
+	});
+}
+
+Music.getTrack = function(user, source, serviceId) {
+	return new Promise(function(resolve, reject) {
+		var module = MusicSource.getSourceModule(source);
+		if (!module) {
+			return reject("unknown source");
+		}
+		MusicSource.getModuleApi(module, user).then(function(api) {
+			api.getTrack(serviceId).then(reslove).catch(reject);
+		}).catch(reject);
+	});
+}
+
+
+Music.getAlbum = function(user, source, serviceId) {
+	return new Promise(function(resolve, reject) {
+		var module = MusicSource.getSourceModule(source);
+		if (!module) {
+			return reject("unknown source");
+		}
+		MusicSource.getModuleApi(module, user).then(function(api) {
+			api.getAlbum(serviceId).then(resolve).catch(reject);
+		}).catch(reject);
 	});
 }
 

@@ -1,4 +1,4 @@
-var  Link = require("../Link");
+var  Link = require("../../link");
 var Promise = require("bluebird");
 var _ = require("lodash");
 

@@ -5,7 +5,7 @@ var Music = require("../music/Music");
 var PlaylistSource = require("../sources/PlaylistSource");
 var MusicSource = require("../sources/MusicSource");
 
-PlaylistGenerator = function() {"use strict";};
+var PlaylistGenerator = function() {"use strict";};
 
 PlaylistGenerator.convertTo = function(playlist, musicSource, user) {
 	return new Promise(function(resolve, reject) {

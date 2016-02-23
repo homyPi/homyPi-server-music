@@ -1,11 +1,14 @@
 module.exports = function(router) {
 	var musicMiddleware = require("./musicMiddleware");
-	var userMiddleware = require("../Link").User.middleware;
+	var User = require("../../link").getShared().User;
 
-	router.get("/search", userMiddleware.isLoggedIn, musicMiddleware.search);
-	router.get("/sources", userMiddleware.isLoggedIn, musicMiddleware.getSources);
-	router.post("/sources/music", userMiddleware.isLoggedIn, musicMiddleware.setMusicSources);
-	router.post("/sources/playlist", userMiddleware.isLoggedIn, musicMiddleware.setPlaylistSources);
+	router.get("/search", User.isLoggedIn, musicMiddleware.search);
+	router.get("/:source/albums/:id", User.isLoggedIn, musicMiddleware.getAlbum);
+	
+
+	router.get("/sources", User.isLoggedIn, musicMiddleware.getSources);
+	router.post("/sources/music", User.isLoggedIn, musicMiddleware.setMusicSources);
+	router.post("/sources/playlist", User.isLoggedIn, musicMiddleware.setPlaylistSources);
 
 
 	return router;

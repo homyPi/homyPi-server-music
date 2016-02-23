@@ -17,7 +17,7 @@ module.exports = {
 			idPlaying: String,
 			tracks: [{
 				_id: Schema.ObjectId,
-				id: String,
+				serviceId: String,
 				source: String,
 				uri: String,
 				name: String,
