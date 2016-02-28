@@ -36,6 +36,10 @@ module.exports = {
 				},
 				externals: {}
 			}]
+		},
+		Players: {
+			name: String,
+			status: String
 		}
 	},
 	"externals": [

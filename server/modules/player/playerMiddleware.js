@@ -1,18 +1,24 @@
 var Players = require("./Players");
 
 var getAll = function(req, res) {
-	var list = Players.getAll();
-	res.json({
-		status: "success", data: {
-			items: list,
-			total: list.length
-		}
+	Players.getAll().then(function(players) {
+		res.json({
+			status: "success", data: {
+				items: players,
+				total: players.length
+			}
+		});
+	}).catch(function(error) {
+		console.log(error);
+		res.json({status: "error", error})
 	});
 };
 var get = function(req, res) {
-	var player = Players.get(req.params.name);
-	res.json({
-		status: "success", data: player
+	Players.get(req.params.name).then(function(player) {
+		res.json({status: "success", data: player});
+	}).catch(function(error) {
+		console.log(error);
+		res.json({status: "error", error})
 	});
 };
 

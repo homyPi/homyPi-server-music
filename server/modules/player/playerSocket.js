@@ -10,6 +10,7 @@ var Players = require("./Players");
 
 module.exports = function(messager) {
 		messager.on("player:status", function(data, topicInfo) {
+			return;
 			var player = Players.get(topicInfo.raspberry);
 			if (!player) return;
 			player.setStatus(data.status);

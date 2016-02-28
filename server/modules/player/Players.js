@@ -1,56 +1,46 @@
+var PlayerModel = require("../../link").getShared().MongooseModels.Players;
 
-var PlayerInstance = function(raspberryName, socketId, status, progress, volume) {
-	this.name = raspberryName;
-	this.socketId = socketId;
-	this.status = status || "PAUSED";
-	this.progress = progress || 0;
-	
-	this.volume = volume || 0;
-
-	this.setStatus = function(status) {
-		this.status = status;
-	}
-}
+import Promise from "bluebird";
 
 var Players = function(){};
 
-Players.players = [];
-
 Players.get = function(name) {
-	for (var i = 0; i < Players.players.length; i++) {
-		if (Players.players[i].name === name) {
-			return Players.players[i];
-		}
-	}
-	console.log("PLAYER " + name + " not found");
+	return new Promise(function(resolve, reject) {
+		PlayerModel.findOne({name: name}, function(err, player) {
+			if (err) return reject(err);
+			if (!player) return reject({code: 404, message: "player not found"});
+			return resolve(player);
+		})
+	});;
 }
 Players.getAll = function() {
-	return Players.players;
+	return new Promise(function(resolve, reject) {
+		PlayerModel.find({}, function(err, players) {
+			if (err) return reject(err);
+			return resolve(players);
+		})
+	})
 }
 
-Players.new = function(raspberryName, socketId, status, progress, volume) {
-	console.log("New Player " + raspberryName);
-	for (var i = 0; i < Players.players.length; i++) {
-		if (Players.players[i].name === raspberryName) {
-			Players.players[i].socketId = socketId;
-			Players.players[i].status = status;
-			Players.players[i].progress = progress;
-			Players.players[i].volume = volume;
-			console.log("Already exists");
-			return;
-		}
-	}
-	var p = new PlayerInstance(raspberryName, socketId, status, progress, volume);
-	Players.players.push(p);
-	console.log("Player created: ", p);
+Players.new = function(raspberryName, status) {
+	return new Promise(function(resolve, reject) {
+		PlayerModel.findOne({name: raspberryName}, function(err, player) {
+			if (err) return reject(err);
+			if (!player) {
+				player = new PlayerModel();
+				player.name = raspberryName;
+			}
+			player.status = status;
+			player.save(function(err) {
+				if(err) return reject(err);
+				console.log("Player created: ", player);
+				return resolve(player);
+			});
+		});
+	});
 }
 Players.remove = function(raspberryName) {
-	for (var i = 0; i < Players.players.length; i++) {
-		if (Players.players[i].name === raspberryName) {
-			Players.players.splice(i, 1);
-			return;
-		}
-	}
+	return;
 }
 
 module.exports = Players;

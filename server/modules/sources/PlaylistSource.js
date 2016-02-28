@@ -1,4 +1,3 @@
-var  Link = require("../../link");
 var Promise = require("bluebird");
 var _ = require("lodash");
 
@@ -7,7 +6,7 @@ PlaylistSource.sources = [];
 PlaylistSource.preferredSource = "spotify";
 
 PlaylistSource.setPreferredSource = function(user, source) {
-	var User = Link.MongooseModels.User
+	var User = require("../../link").getShared().MongooseModels.User
 	return new Promise(function(resolve, reject) {
 		User.update({ _id: user._id }, 
 			{ 
@@ -20,10 +19,6 @@ PlaylistSource.setPreferredSource = function(user, source) {
 				if(err) {
 					return reject(err);
 				} else {
-					console.log(":..........................");
-					console.log(val);
-					console.log(user);
-					console.log(":..........................");
 					return resolve();
 				}
 			});
@@ -31,7 +26,7 @@ PlaylistSource.setPreferredSource = function(user, source) {
 }
 
 PlaylistSource.getSource = function(user, sourceName) {
-	var User = Link.MongooseModels.User
+	var User = require("../../link").getShared().MongooseModels.User
 	return new Promise(function(resolve, reject) {
 		if(sourceName) {
 			return resolve(sourceName);
