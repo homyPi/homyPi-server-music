@@ -47,7 +47,6 @@ PlaylistGenerator.generate = function (user, playlistSource, musicSource, option
             .then(function (instance) {
                 instance.generate()
                     .then(function () {
-                        console.log("!!!!!", JSON.stringify(instance.playlist, null, 2));
                         if (!musicSource || musicSource === playlistSource ||
                             musicSource === "default") {
                             resolve(instance.playlist);
