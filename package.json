@@ -63,7 +63,7 @@
   },
   "scripts": {
     "test": "./node_modules/.bin/mocha --compilers js:babel-core/register server/test/musicTests.js",
-    "build": "babel ./public/module -d ./public/lib",
+    "build": "./node_modules/.bin/babel ./public/module -d ./public/lib",
     "postinstall": "node -e \"require('fs').stat('./public/lib', function (e, s) { process.exit(e || 0) })\"; npm run build"
   }
 }
